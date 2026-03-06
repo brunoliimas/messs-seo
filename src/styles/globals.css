@@ -1,0 +1,312 @@
+/* ============================================================================
+   MESSS × Galderma Digital Audit Dashboard
+   Design System — Tailwind CSS v4 + MESSS Brand Guide 2025
+   ============================================================================ */
+/* ── Google Fonts ── */
+@import url("https://fonts.googleapis.com/css2?family=Host+Grotesk:ital,wght@0,300..800;1,300..800&family=VT323&display=swap");
+
+@import "tailwindcss";
+
+
+/* ══════════════════════════════════════════════
+   THEME TOKENS
+   Todas as cores, fontes e espaçamentos do brand guide
+   Uso: bg-purple, text-magenta, font-display, etc.
+   ══════════════════════════════════════════════ */
+
+@theme {
+  /* ── Cores Primárias ── */
+  --color-purple: #8021de;
+  --color-purple-light: #a347ff;
+  --color-purple-dark: #681bb5;
+  --color-magenta: #be12b3;
+  --color-magenta-light: #d93cce;
+  --color-magenta-dark: #a6109c;
+  --color-deep: #6f2378;
+  --color-deep-light: #5b1d62;
+  --color-indigo: #4124b2;
+  --color-indigo-light: #402bdc;
+  --color-indigo-dark: #411c87;
+
+  /* ── Cores Neutras ── */
+  --color-cream: #f2f0ee;
+  --color-black: #0a0a0a;
+  --color-surface: #111111;
+  --color-surface-alt: #161618;
+  --color-border: #1e1e22;
+
+  /* ── Cores de Status (métricas) ── */
+  --color-status-good: #22c55e;
+  --color-status-warn: #eab308;
+  --color-status-orange: #f97316;
+  --color-status-bad: #ef4444;
+
+  /* ── Tipografia ── */
+  --font-family-display: "Host Grotesk", sans-serif;
+  --font-family-mono: "VT323", monospace;
+
+  /* ── Border Radius ── */
+  --radius-card: 14px;
+  --radius-badge: 8px;
+  --radius-button: 10px;
+
+  /* ── Transições ── */
+  --transition-fast: 0.2s ease;
+  --transition-enter: 0.8s ease-out;
+  --transition-enter-slow: 1.2s ease-out;
+
+  /* ── Shadows ── */
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-card-hover: 0 4px 12px rgba(128, 33, 222, 0.15);
+}
+
+/* ══════════════════════════════════════════════
+   LIGHT / DARK MODE CSS VARIABLES
+   O dark mode é o padrão (MESSS brand guide)
+   ══════════════════════════════════════════════ */
+
+:root {
+  /* Dark mode padrão */
+  --bg-primary: #0a0a0a;
+  --bg-surface: #111111;
+  --bg-surface-alt: #161618;
+  --border-subtle: #1e1e22;
+  --text-primary: #f2f0ee;
+  --text-secondary: #a1a1aa;
+  --text-muted: #71717a;
+}
+
+[data-theme="light"] {
+  --bg-primary: #f2f0ee;
+  --bg-surface: #ffffff;
+  --bg-surface-alt: #f5f3f1;
+  --border-subtle: #e4e2df;
+  --text-primary: #0a0a0a;
+  --text-secondary: #52525b;
+  --text-muted: #71717a;
+}
+
+/* ══════════════════════════════════════════════
+   BASE STYLES
+   ══════════════════════════════════════════════ */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  color-scheme: dark;
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+}
+
+body {
+  font-family: var(--font-family-display);
+  font-weight: 400;
+  line-height: 1.6;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ══════════════════════════════════════════════
+   TYPOGRAPHY UTILITIES
+   ══════════════════════════════════════════════ */
+
+/* Títulos: Host Grotesk bold/extrabold, tracking apertado */
+.text-heading-xl {
+  font-family: var(--font-family-display);
+  font-weight: 800;
+  letter-spacing: -1px;
+  line-height: 1.1;
+}
+
+.text-heading-lg {
+  font-family: var(--font-family-display);
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+}
+
+.text-heading-md {
+  font-family: var(--font-family-display);
+  font-weight: 600;
+  letter-spacing: -0.3px;
+  line-height: 1.3;
+}
+
+/* Labels/Métricas: VT323 monospace, uppercase */
+.text-metric {
+  font-family: var(--font-family-mono);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+.text-metric-value {
+  font-family: var(--font-family-mono);
+  font-weight: 400;
+  letter-spacing: 0.5px;
+}
+
+/* ══════════════════════════════════════════════
+   COMPONENT PATTERNS
+   ══════════════════════════════════════════════ */
+
+/* Card base (dark mode) */
+.card {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-card);
+  transition: border-color var(--transition-fast);
+  position: relative;
+  overflow: hidden;
+}
+
+.card:hover {
+  border-color: rgba(128, 33, 222, 0.4);
+  /* purple com 40% opacity */
+}
+
+/* Barra colorida no topo do card (3px) */
+.card-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+}
+
+.card-bar--messs {
+  background: linear-gradient(135deg, #681bb5, #8021de);
+}
+
+.card-bar--studios {
+  background: linear-gradient(135deg, #a6109c, #be12b3);
+}
+
+.card-bar--in {
+  background: linear-gradient(135deg, #5b1d62, #6f2378);
+}
+
+/* Badge de status */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--radius-badge);
+  font-family: var(--font-family-mono);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.badge--good {
+  background-color: rgba(34, 197, 94, 0.08);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+  color: #22c55e;
+}
+
+.badge--warn {
+  background-color: rgba(234, 179, 8, 0.08);
+  border: 1px solid rgba(234, 179, 8, 0.2);
+  color: #eab308;
+}
+
+.badge--orange {
+  background-color: rgba(249, 115, 22, 0.08);
+  border: 1px solid rgba(249, 115, 22, 0.2);
+  color: #f97316;
+}
+
+.badge--bad {
+  background-color: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+/* ══════════════════════════════════════════════
+   GRADIENTS
+   ══════════════════════════════════════════════ */
+
+.gradient-messs {
+  background: linear-gradient(135deg, #681bb5, #8021de);
+}
+
+.gradient-studios {
+  background: linear-gradient(135deg, #a6109c, #be12b3);
+}
+
+.gradient-in {
+  background: linear-gradient(135deg, #5b1d62, #6f2378);
+}
+
+.gradient-mesh {
+  background: linear-gradient(135deg,
+      #0a0a0a 0%,
+      #681bb5 30%,
+      #be12b3 65%,
+      #d93cce 100%);
+}
+
+/* ══════════════════════════════════════════════
+   SCROLLBAR (dark theme)
+   ══════════════════════════════════════════════ */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-subtle);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(128, 33, 222, 0.4);
+}
+
+/* ══════════════════════════════════════════════
+   ANIMATIONS
+   ══════════════════════════════════════════════ */
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes score-ring-fill {
+  from {
+    stroke-dashoffset: var(--ring-circumference, 283);
+  }
+
+  to {
+    stroke-dashoffset: var(--ring-offset, 0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in var(--transition-enter) forwards;
+}
+
+.animate-score-ring {
+  animation: score-ring-fill 1.2s ease-out forwards;
+}
