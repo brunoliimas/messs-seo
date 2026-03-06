@@ -11,8 +11,11 @@ interface BrandCardProps {
 
 export function BrandCard({ brand }: BrandCardProps) {
   return (
-    <Link href={`/dashboard/${brand.slug}`} className="block group">
-      <div className="card p-0">
+    <Link
+      href={`/dashboard/${brand.slug}`}
+      className="block group focus:outline-none focus-visible:ring-2 focus-visible:ring-purple focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-primary)] rounded-[var(--radius-card)]"
+    >
+      <div className="card p-0 transition-transform duration-[var(--transition-fast)] group-hover:scale-[1.02]">
         {/* Barra colorida no topo */}
         <div className="h-[3px]" style={{ background: brand.gradient || "var(--color-purple)" }} />
 

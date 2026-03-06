@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import type { BrandSummary } from "@/types";
 import type { MockSnapshot } from "@/lib/mock-data";
 import { formatMs, formatCLS } from "@/lib/utils/formatters";
@@ -252,9 +253,9 @@ export function CompareTable({ brands, snapshots }: CompareTableProps) {
 
           <tbody>
             {allSections.map((section) => (
-              <>
+              <React.Fragment key={section.title}>
                 {/* Section header */}
-                <tr key={section.title}>
+                <tr>
                   <td
                     colSpan={brands.length + 1}
                     className="px-5 pt-5 pb-2 text-metric text-[10px] text-[var(--text-muted)]"
@@ -312,7 +313,7 @@ export function CompareTable({ brands, snapshots }: CompareTableProps) {
                     </tr>
                   );
                 })}
-              </>
+              </React.Fragment>
             ))}
           </tbody>
         </table>
