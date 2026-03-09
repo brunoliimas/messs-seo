@@ -1,0 +1,15 @@
+---
+alwaysApply: true
+---
+
+Always maintain a clear architecture.
+
+Prefer:
+- separation between layout and UI components
+- reusable modules
+- predictable folder structure
+
+Avoid:
+- mixing business logic with UI
+- oversized files
+- duplicated patterns

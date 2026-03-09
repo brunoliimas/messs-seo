@@ -2,14 +2,14 @@
 
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { Loader2 } from "lucide-react";
+import { Loader2, Mail } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 import { Logo } from "@/components/shared/Logo";
-import { cn } from "@/lib/utils";
 
 function LoginFormInner() {
   const [email, setEmail] = useState("");
@@ -38,9 +38,15 @@ function LoginFormInner() {
     setLoading(true);
     setError(null);
     const supabase = createClient();
+    // Origin só no client (handler); evita uso de window durante render/SSR
+    const origin =
+      typeof window !== "undefined"
+        ? window.location.origin
+        : process.env.NEXT_PUBLIC_APP_URL ?? "";
+    const redirectTo = origin ? `${origin}/auth/callback` : undefined;
     const { error } = await supabase.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+      options: { emailRedirectTo: redirectTo },
     });
     setLoading(false);
     if (error) {
@@ -51,125 +57,131 @@ function LoginFormInner() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12 relative z-10">
-      <div className="w-full max-w-[400px] space-y-12 animate-fade-in">
-        {/* Logo + tagline — mais respiro e hierarquia */}
-        <header className="flex flex-col items-center text-center">
-          <h1 className="sr-only">MESSS — Digital Audit Dashboard</h1>
-          <Logo className="mx-auto" size="lg" color="var(--color-purple)" />
-          <p className="text-metric text-[11px] text-[var(--text-muted)] mt-4 tracking-[0.2em]">
-            Digital Audit Dashboard
-          </p>
-        </header>
+    <div className="login-bg min-h-screen flex flex-col items-center justify-center animate-fade-in" style={{ padding: "48px 24px", gap: "24px" }}>
+      {/* Logo */}
+      <div className="flex flex-col items-center" style={{ gap: "8px" }}>
+        <Logo size={140} color="#ffffff" />
+        <span style={{ color: "rgba(255,255,255,0.7)", fontSize: "11px", letterSpacing: "0.3em", textTransform: "uppercase" }}>
+          Digital Audit Dashboard
+        </span>
+      </div>
 
-        {/* Card do formulário — destaque visual, padding generoso */}
-        <Card
-          className={cn(
-            "relative overflow-hidden rounded-[var(--radius-card)]",
-            "border border-[var(--border-subtle)] bg-[var(--bg-surface)]",
-            "shadow-[var(--shadow-card)]"
-          )}
-        >
-          <div className="card-bar card-bar--messs" />
-          <CardContent className="pt-10 pb-10 px-8">
-            {externalErrorMessage && (
-              <p className="text-xs text-destructive mb-5 rounded-lg bg-destructive/10 border border-destructive/20 px-4 py-3">
-                {externalErrorMessage}
+      {/* Card */}
+      <Card
+        className="w-full border-0 shadow-2xl rounded-2xl"
+        style={{ maxWidth: "400px", backgroundColor: "#ffffff" }}
+      >
+        <div style={{ padding: "32px" }}>
+          {sent ? (
+            <div className="text-center" style={{ padding: "16px 0" }}>
+              <div
+                className="flex items-center justify-center rounded-full"
+                style={{ width: 48, height: 48, backgroundColor: "rgba(99,102,241,0.1)", margin: "0 auto 16px" }}
+              >
+                <Mail size={22} style={{ color: "#6366f1" }} />
+              </div>
+              <p className="font-semibold" style={{ fontSize: "16px", color: "#111", marginBottom: "6px" }}>
+                Link enviado!
               </p>
-            )}
-
-            {sent ? (
-              <div className="text-center py-2">
-                <p className="text-heading-md text-base text-foreground mb-2">
-                  Link enviado
-                </p>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  Verifique <strong className="text-foreground">{email}</strong> e
-                  use o link para acessar o dashboard.
+              <p style={{ fontSize: "14px", color: "#6b7280", lineHeight: 1.6 }}>
+                Verifique <strong style={{ color: "#374151" }}>{email}</strong> e use o link para acessar.
+              </p>
+            </div>
+          ) : (
+            <>
+              <div className="text-center" style={{ marginBottom: "24px" }}>
+                <h1 className="font-bold" style={{ fontSize: "22px", color: "#111", marginBottom: "4px" }}>
+                  Bem-vindo de volta!
+                </h1>
+                <p style={{ fontSize: "14px", color: "#6b7280" }}>
+                  Digite seu email para receber o link de acesso.
                 </p>
               </div>
-            ) : (
-              <>
-                <p className="text-heading-md text-sm text-[var(--text-secondary)] mb-6">
-                  Entre com seu email para receber o link de acesso.
+
+              {externalErrorMessage && (
+                <p
+                  className="text-destructive rounded-lg"
+                  style={{ fontSize: "12px", marginBottom: "16px", padding: "10px 12px", backgroundColor: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)" }}
+                >
+                  {externalErrorMessage}
                 </p>
-                <form onSubmit={handleSubmit} className="space-y-5">
-                  <div className="space-y-2.5">
-                    <Label
-                      htmlFor="login-email"
-                      className="text-metric text-[10px] text-[var(--text-muted)] tracking-widest"
-                    >
-                      Email
-                    </Label>
-                    <Input
-                      id="login-email"
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="seu@email.com"
-                      required
-                      autoComplete="email"
-                      className="h-12 rounded-[var(--radius-button)] border-[var(--border-subtle)] bg-[var(--bg-surface-alt)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus-visible:ring-purple/50"
-                    />
-                  </div>
+              )}
 
-                  {error && (
-                    <p className="text-xs text-destructive rounded-lg bg-destructive/10 border border-destructive/20 px-4 py-3">
-                      {error}
-                    </p>
-                  )}
+              <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                  <Label htmlFor="login-email" style={{ fontSize: "14px", fontWeight: 500, color: "#374151" }}>
+                    Email
+                  </Label>
+                  <Input
+                    id="login-email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="seu@email.com"
+                    required
+                    autoComplete="email"
+                    style={{ height: "44px" }}
+                  />
+                </div>
 
-                  <Button
-                    type="submit"
-                    disabled={loading || !email}
-                    size="lg"
-                    className="w-full h-12 rounded-[var(--radius-button)] font-semibold"
+                {error && (
+                  <p
+                    className="text-destructive rounded-lg"
+                    style={{ fontSize: "12px", padding: "10px 12px", backgroundColor: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)" }}
                   >
-                    {loading ? (
-                      <>
-                        <Loader2 size={18} className="animate-spin" />
-                        Enviando...
-                      </>
-                    ) : (
-                      "Enviar Magic Link"
-                    )}
-                  </Button>
-                </form>
-              </>
-            )}
-          </CardContent>
-        </Card>
+                    {error}
+                  </p>
+                )}
 
-        <p className="text-center text-xs text-[var(--text-muted)] tracking-wider">
-          messs.com.br
-        </p>
-      </div>
+                <Button
+                  type="submit"
+                  disabled={loading || !email}
+                  size="lg"
+                  className="w-full font-semibold"
+                  style={{ height: "44px", backgroundColor: "#6366f1", color: "#fff" }}
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" />
+                      Enviando...
+                    </>
+                  ) : (
+                    "Entrar com Magic Link"
+                  )}
+                </Button>
+              </form>
+
+              <Separator style={{ margin: "20px 0" }} />
+
+              <p className="text-center" style={{ fontSize: "12px", color: "#9ca3af" }}>
+                Acesso exclusivo para equipe MESSS
+              </p>
+            </>
+          )}
+        </div>
+      </Card>
+
+      <p style={{ fontSize: "12px", color: "rgba(255,255,255,0.35)", letterSpacing: "0.15em" }}>
+        messs.com.br
+      </p>
     </div>
   );
 }
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center px-4 py-12">
-        <div className="w-full max-w-[400px] space-y-12">
-          <header className="flex flex-col items-center text-center">
-            <h1 className="sr-only">MESSS — Digital Audit Dashboard</h1>
-            <Logo className="mx-auto" size="lg" color="var(--color-purple)" />
-            <p className="text-metric text-[11px] text-muted-foreground mt-4 tracking-[0.2em]">Digital Audit Dashboard</p>
-          </header>
-          <Card className="relative overflow-hidden rounded-[var(--radius-card)] border border-[var(--border-subtle)] shadow-[var(--shadow-card)]">
-            <div className="card-bar card-bar--messs" />
-            <CardContent className="pt-10 pb-10 px-8">
-              <div className="h-24 flex items-center justify-center">
-                <Loader2 size={24} className="animate-spin text-muted-foreground" />
-              </div>
-            </CardContent>
+    <Suspense
+      fallback={
+        <div className="login-bg min-h-screen flex flex-col items-center justify-center" style={{ padding: "48px 24px", gap: "24px" }}>
+          <Logo size={140} color="#ffffff" />
+          <Card className="w-full border-0 shadow-2xl rounded-2xl" style={{ maxWidth: "400px", backgroundColor: "#ffffff" }}>
+            <div className="flex items-center justify-center" style={{ padding: "48px 32px" }}>
+              <Loader2 size={24} className="animate-spin" style={{ color: "#9ca3af" }} />
+            </div>
           </Card>
-          <p className="text-center text-xs text-muted-foreground tracking-wider">messs.com.br</p>
         </div>
-      </div>
-    }>
+      }
+    >
       <LoginFormInner />
     </Suspense>
   );

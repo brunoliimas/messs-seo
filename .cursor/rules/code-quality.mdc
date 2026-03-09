@@ -1,0 +1,10 @@
+---
+alwaysApply: true
+---
+
+Code must follow professional standards.
+
+Avoid:
+- duplicated logic
+- unnecessary abstractions
+- unclear naming

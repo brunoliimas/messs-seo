@@ -2,6 +2,8 @@
 
 import { ScoreRing } from "@/components/charts/ScoreRing";
 import { ExternalLink, Globe, Server } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import type { BrandSummary } from "@/types";
 
 interface ScoresOverviewProps {
@@ -17,24 +19,24 @@ export function ScoresOverview({ brand }: ScoresOverviewProps) {
   ];
 
   return (
-    <div className="card p-0">
+    <Card className="overflow-hidden">
       <div
         className="h-[3px]"
         style={{ background: brand.gradient || "var(--color-purple)" }}
       />
 
-      <div className="p-6">
+      <CardContent className="p-6">
         {/* Brand header */}
         <div className="flex items-start justify-between mb-8">
           <div>
             <h2 className="text-heading-lg text-2xl">{brand.name}</h2>
             <div className="flex items-center gap-4 mt-2">
-              <span className="flex items-center gap-1.5 text-sm text-[var(--text-secondary)]">
+              <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
                 <Globe size={14} />
                 {brand.domain}
               </span>
               {brand.platform && (
-                <span className="flex items-center gap-1.5 text-sm text-[var(--text-muted)]">
+                <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
                   <Server size={14} />
                   {brand.platform}
                 </span>
@@ -45,7 +47,7 @@ export function ScoresOverview({ brand }: ScoresOverviewProps) {
             href={`https://${brand.domain}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1.5 text-xs text-[var(--text-muted)] hover:text-purple-light transition-colors"
+            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-purple-light transition-colors"
           >
             Visitar site
             <ExternalLink size={12} />
@@ -68,12 +70,13 @@ export function ScoresOverview({ brand }: ScoresOverviewProps) {
         </div>
 
         {/* Audit info */}
-        <div className="flex items-center justify-center gap-6 mt-6 pt-4 border-t border-[var(--border-subtle)]">
-          <span className="text-metric text-[10px] text-[var(--text-muted)]">
+        <Separator className="mt-6 mb-4" />
+        <div className="flex items-center justify-center">
+          <span className="text-metric text-[10px] text-muted-foreground">
             AUDITORIA COMPLETA — MARÇO 2026
           </span>
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

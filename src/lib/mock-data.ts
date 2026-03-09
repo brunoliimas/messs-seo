@@ -44,7 +44,7 @@ export const MOCK_BRANDS: BrandSummary[] = [
   },
   {
     id: "alastin",
-    name: "ALASTIN Skincare",
+    name: "Alastin Skincare",
     slug: "alastin",
     domain: "alastin.com.br",
     platform: "Magento / Adobe Commerce",

@@ -25,7 +25,7 @@ const bottomItems = [
 const brandItems = [
   { slug: "cetaphil", name: "Cetaphil", color: "#8021de" },
   { slug: "dermotivin", name: "Dermotivin", color: "#be12b3" },
-  { slug: "alastin", name: "ALASTIN", color: "#4124b2" },
+  { slug: "alastin", name: "Alastin", color: "#4124b2" },
 ];
 
 interface SidebarNavProps {

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Sun, Moon } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const THEME_KEY = "messs-dashboard-theme";
 
@@ -32,14 +33,31 @@ export function ThemeToggle() {
     localStorage.setItem(THEME_KEY, next);
   }
 
+  // Evita hydration mismatch: servidor e primeiro paint do cliente renderizam
+  // o mesmo placeholder; ícone real só após mount (localStorage/document).
+  if (!mounted) {
+    return (
+      <Button
+        variant="outline"
+        size="icon"
+        className="h-9 w-9"
+        aria-label="Tema"
+        disabled
+      >
+        <span className="inline-block size-4" aria-hidden />
+      </Button>
+    );
+  }
+
   return (
-    <button
-      type="button"
+    <Button
+      variant="outline"
+      size="icon"
       onClick={toggleTheme}
-      className="flex items-center justify-center w-9 h-9 rounded-[var(--radius-button)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-purple/40 transition-colors cursor-pointer"
+      className="h-9 w-9"
       aria-label={theme === "dark" ? "Ativar modo claro" : "Ativar modo escuro"}
     >
       {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
-    </button>
+    </Button>
   );
 }

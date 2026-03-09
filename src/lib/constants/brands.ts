@@ -30,7 +30,7 @@ export const GALDERMA_BRANDS: BrandConfig[] = [
     gradient: "linear-gradient(135deg, #a6109c, #be12b3)",
   },
   {
-    name: "ALASTIN Skincare",
+    name: "Alastin Skincare",
     slug: "alastin",
     domain: "alastin.com.br",
     platform: "Magento / Adobe Commerce",

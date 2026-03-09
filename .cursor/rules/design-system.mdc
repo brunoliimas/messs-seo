@@ -1,0 +1,17 @@
+---
+alwaysApply: true
+---
+The project uses a design system.
+
+Rules:
+
+- Never change design tokens
+- Never introduce new colors
+- Reuse existing components whenever possible
+- Maintain the theme structure
+
+When modifying UI:
+
+- prioritize composition over rewriting
+- keep styling consistent
+- respect spacing scale

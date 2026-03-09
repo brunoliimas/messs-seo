@@ -1,0 +1,34 @@
+---
+alwaysApply: false
+---
+
+Design interfaces at the quality level of modern SaaS products.
+
+Inspiration:
+Stripe
+Vercel
+Linear
+Notion
+
+UI principles:
+
+- strong visual hierarchy
+- card-based layout
+- generous spacing
+- minimal visual noise
+- predictable layout patterns
+
+Design guidelines:
+
+Use:
+- dashboard style layouts
+- grouped information in cards
+- grid based content structure
+- clear typography hierarchy
+
+Avoid:
+- cramped layouts
+- inconsistent spacing
+- large blocks of undifferentiated content
+
+Interfaces should feel modern, clean, and professional.

@@ -23,6 +23,23 @@ function hasDatabase(): boolean {
   );
 }
 
+// ── Log fallback uma vez por processo (evita poluir o console) ──
+let dalFallbackLogged = false;
+function logDalFallback(fn: string, error: unknown): void {
+  if (dalFallbackLogged) return;
+  dalFallbackLogged = true;
+  const message =
+    error instanceof Error ? error.message : String(error);
+  const cause =
+    error instanceof Error && error.cause instanceof Error
+      ? error.cause.message
+      : "";
+  console.warn(
+    "[DAL] Banco indisponível, usando dados mock. Defina DATABASE_URL e garanta que o Postgres está acessível para usar dados reais.",
+    process.env.NODE_ENV === "development" ? `(${fn}: ${message}${cause ? ` — ${cause}` : ""})` : ""
+  );
+}
+
 // ── Lazy import DB (avoids crash when env vars are missing) ──
 async function getDb() {
   const { db, schema } = await import("./db");
@@ -53,14 +70,16 @@ export async function getBrands(): Promise<BrandSummary[]> {
     });
 
     return brands.map((brand) => {
-      const latestAudit = brand.audits[0];
-      const criticalCount = brand.findings.filter(
+      const audits = brand.audits ?? [];
+      const findings = brand.findings ?? [];
+      const latestAudit = audits[0];
+      const criticalCount = findings.filter(
         (f) => f.type === "critical"
       ).length;
-      const warningCount = brand.findings.filter(
+      const warningCount = findings.filter(
         (f) => f.type === "warning"
       ).length;
-      const goodCount = brand.findings.filter(
+      const goodCount = findings.filter(
         (f) => f.type === "good"
       ).length;
 
@@ -69,25 +88,25 @@ export async function getBrands(): Promise<BrandSummary[]> {
         name: brand.name,
         slug: brand.slug,
         domain: brand.domain,
-        platform: brand.platform,
-        color: brand.color,
-        gradient: brand.gradient,
+        platform: brand.platform ?? null,
+        color: brand.color ?? null,
+        gradient: brand.gradient ?? null,
         scores: {
           cwv: {
-            letter: latestAudit?.cwvScore || "—",
-            numeric: latestAudit?.cwvNumeric || 0,
+            letter: latestAudit?.cwvScore ?? "—",
+            numeric: Number(latestAudit?.cwvNumeric) || 0,
           },
           seo: {
-            letter: latestAudit?.seoScore || "—",
-            numeric: latestAudit?.seoNumeric || 0,
+            letter: latestAudit?.seoScore ?? "—",
+            numeric: Number(latestAudit?.seoNumeric) || 0,
           },
           aeo: {
-            letter: latestAudit?.aeoScore || "—",
-            numeric: latestAudit?.aeoNumeric || 0,
+            letter: latestAudit?.aeoScore ?? "—",
+            numeric: Number(latestAudit?.aeoNumeric) || 0,
           },
           llm: {
-            letter: latestAudit?.llmScore || "—",
-            numeric: latestAudit?.llmNumeric || 0,
+            letter: latestAudit?.llmScore ?? "—",
+            numeric: Number(latestAudit?.llmNumeric) || 0,
           },
         },
         findingCounts: {
@@ -98,7 +117,7 @@ export async function getBrands(): Promise<BrandSummary[]> {
       };
     });
   } catch (error) {
-    console.error("[DAL] getBrands failed, using mock:", error);
+    logDalFallback("getBrands", error);
     const { MOCK_BRANDS } = await import("./mock-data");
     return MOCK_BRANDS;
   }
@@ -132,42 +151,44 @@ export async function getBrandBySlug(
 
     if (!brand) return undefined;
 
-    const latestAudit = brand.audits[0];
+    const audits = brand.audits ?? [];
+    const findings = brand.findings ?? [];
+    const latestAudit = audits[0];
 
     return {
       id: brand.id,
       name: brand.name,
       slug: brand.slug,
       domain: brand.domain,
-      platform: brand.platform,
-      color: brand.color,
-      gradient: brand.gradient,
+      platform: brand.platform ?? null,
+      color: brand.color ?? null,
+      gradient: brand.gradient ?? null,
       scores: {
         cwv: {
-          letter: latestAudit?.cwvScore || "—",
-          numeric: latestAudit?.cwvNumeric || 0,
+          letter: latestAudit?.cwvScore ?? "—",
+          numeric: Number(latestAudit?.cwvNumeric) || 0,
         },
         seo: {
-          letter: latestAudit?.seoScore || "—",
-          numeric: latestAudit?.seoNumeric || 0,
+          letter: latestAudit?.seoScore ?? "—",
+          numeric: Number(latestAudit?.seoNumeric) || 0,
         },
         aeo: {
-          letter: latestAudit?.aeoScore || "—",
-          numeric: latestAudit?.aeoNumeric || 0,
+          letter: latestAudit?.aeoScore ?? "—",
+          numeric: Number(latestAudit?.aeoNumeric) || 0,
         },
         llm: {
-          letter: latestAudit?.llmScore || "—",
-          numeric: latestAudit?.llmNumeric || 0,
+          letter: latestAudit?.llmScore ?? "—",
+          numeric: Number(latestAudit?.llmNumeric) || 0,
         },
       },
       findingCounts: {
-        critical: brand.findings.filter((f) => f.type === "critical").length,
-        warning: brand.findings.filter((f) => f.type === "warning").length,
-        good: brand.findings.filter((f) => f.type === "good").length,
+        critical: findings.filter((f) => f.type === "critical").length,
+        warning: findings.filter((f) => f.type === "warning").length,
+        good: findings.filter((f) => f.type === "good").length,
       },
     };
   } catch (error) {
-    console.error("[DAL] getBrandBySlug failed, using mock:", error);
+    logDalFallback("getBrandBySlug", error);
     const { getMockBrand } = await import("./mock-data");
     return getMockBrand(slug);
   }
@@ -211,7 +232,7 @@ export async function getFindings(
       resolved: f.resolved,
     }));
   } catch (error) {
-    console.error("[DAL] getFindings failed, using mock:", error);
+    logDalFallback("getFindings", error);
     const { getMockFindings } = await import("./mock-data");
     return getMockFindings(brandSlug);
   }
@@ -249,7 +270,7 @@ export async function getAllFindings(): Promise<
 
     return result;
   } catch (error) {
-    console.error("[DAL] getAllFindings failed, using mock:", error);
+    logDalFallback("getAllFindings", error);
     const { MOCK_FINDINGS } = await import("./mock-data");
     return MOCK_FINDINGS;
   }
@@ -295,7 +316,7 @@ export async function getRecommendations(
       status: r.status as "pending" | "in_progress" | "done" | "wont_fix",
     }));
   } catch (error) {
-    console.error("[DAL] getRecommendations failed, using mock:", error);
+    logDalFallback("getRecommendations", error);
     const { getMockRecommendations } = await import("./mock-data");
     return getMockRecommendations(brandSlug);
   }
@@ -359,7 +380,7 @@ export async function getSnapshots(
       } as MockSnapshot;
     });
   } catch (error) {
-    console.error("[DAL] getSnapshots failed, using mock:", error);
+    logDalFallback("getSnapshots", error);
     const { getMockSnapshots } = await import("./mock-data");
     return getMockSnapshots(brandSlug);
   }
@@ -387,7 +408,7 @@ export async function getAllSnapshots(): Promise<
     }
     return result;
   } catch (error) {
-    console.error("[DAL] getAllSnapshots failed, using mock:", error);
+    logDalFallback("getAllSnapshots", error);
     const { MOCK_SNAPSHOTS } = await import("./mock-data");
     return MOCK_SNAPSHOTS;
   }
@@ -475,7 +496,7 @@ export async function getTimeline(
       };
     });
   } catch (error) {
-    console.error("[DAL] getTimeline failed, using mock:", error);
+    logDalFallback("getTimeline", error);
     const { getMockTimeline } = await import("./mock-data");
     return getMockTimeline(brandSlug);
   }

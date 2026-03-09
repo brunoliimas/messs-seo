@@ -1,0 +1,10 @@
+---
+alwaysApply: true
+---
+
+UI must work on all screen sizes.
+
+Rules:
+- mobile-first layout
+- responsive grids
+- collapsible navigation

@@ -6,6 +6,11 @@ import { MetricsGrid } from "./MetricsGrid";
 import { FindingsPanel } from "./FindingsPanel";
 import { RecommendationList } from "./RecommendationList";
 import { BrandNav } from "./BrandNav";
+import { SearchConsoleCard } from "@/components/cards/SearchConsoleCard";
+import { RedditMentionsCard } from "@/components/cards/RedditMentionsCard";
+import { KeywordSuggestionsCard } from "@/components/cards/KeywordSuggestionsCard";
+import { AEOQuestionsCard } from "@/components/cards/AEOQuestionsCard";
+import { BrandEntityCard } from "@/components/cards/BrandEntityCard";
 import type { BrandSummary } from "@/types";
 import type { MockSnapshot } from "@/lib/mock-data";
 import type { Finding, Recommendation } from "@/lib/db/schema";
@@ -48,7 +53,17 @@ export function BrandDetailClient({
       {/* Section content */}
       <div className="animate-fade-in" key={activeSection}>
         {activeSection === "metrics" && (
-          <MetricsGrid snapshots={snapshots} brandColor={brandColor} />
+          <div className="space-y-6">
+            <MetricsGrid snapshots={snapshots} brandColor={brandColor} />
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <SearchConsoleCard brandId={brand.id} />
+              <RedditMentionsCard brandId={brand.id} />
+              <KeywordSuggestionsCard brandId={brand.id} keyword={brand.name} />
+              <AEOQuestionsCard brandId={brand.id} />
+              <BrandEntityCard brandId={brand.id} />
+            </div>
+          </div>
         )}
         {activeSection === "findings" && (
           <FindingsPanel findings={findings} brandColor={brandColor} />

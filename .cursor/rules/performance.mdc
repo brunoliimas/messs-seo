@@ -1,0 +1,10 @@
+---
+alwaysApply: true
+---
+
+Optimize UI performance.
+
+Prefer:
+- memoized components when necessary
+- avoiding unnecessary renders
+- efficient layout structure

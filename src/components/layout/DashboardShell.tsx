@@ -16,6 +16,7 @@ function DashboardShellInner({ children }: { children: React.ReactNode }) {
         <SheetContent
           side="left"
           showCloseButton={true}
+          title="Navegação"
           className="w-64 p-0 pt-14 gap-0 flex flex-col border-[var(--border-subtle)] bg-[var(--bg-surface)]"
         >
           <SidebarNav onLinkClick={() => setOpen(false)} />

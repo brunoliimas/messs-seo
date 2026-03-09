@@ -1,0 +1,10 @@
+---
+alwaysApply: true
+---
+
+Components must be reusable and predictable.
+
+Prefer:
+- clear props
+- minimal side effects
+- composability

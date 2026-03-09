@@ -6,13 +6,22 @@ import type { MockSnapshot } from "@/lib/mock-data";
 import { formatMs, formatCLS } from "@/lib/utils/formatters";
 import { getScoreColor } from "@/lib/utils/ratings";
 import { getRatingColor, type Rating } from "@/lib/constants/thresholds";
+import { Card } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 interface CompareTableProps {
   brands: BrandSummary[];
   snapshots: Record<string, MockSnapshot[]>;
 }
 
-interface TableRow {
+interface MetricRow {
   label: string;
   category: string;
   values: {
@@ -24,7 +33,6 @@ interface TableRow {
 }
 
 function getBestIndex(values: { display: string; rating: Rating | null }[]): number {
-  // Return the index of the best performing brand for this metric
   const ratingOrder: Record<string, number> = { good: 3, "needs-improvement": 2, poor: 1 };
   let bestIdx = 0;
   let bestScore = -1;
@@ -63,7 +71,7 @@ function getLighthouseValue(
 
 export function CompareTable({ brands, snapshots }: CompareTableProps) {
   // ── Build score rows ──
-  const scoreRows: TableRow[] = [
+  const scoreRows: MetricRow[] = [
     {
       label: "Core Web Vitals",
       category: "score",
@@ -111,13 +119,12 @@ export function CompareTable({ brands, snapshots }: CompareTableProps) {
     ttfb: "TTFB (Mobile)",
   };
 
-  const cwvRows: TableRow[] = cwvMetrics.map((metric) => ({
+  const cwvRows: MetricRow[] = cwvMetrics.map((metric) => ({
     label: cwvLabels[metric],
     category: "cwv",
     values: brands.map((b) => {
       const data = getCruxValue(snapshots[b.slug] || [], "mobile", metric);
       if (data.value === null) {
-        // Try lighthouse lab data
         const lhSnap = (snapshots[b.slug] || []).find((s) => s.source === "lighthouse");
         const lhVal = lhSnap?.metrics[metric]?.value ?? null;
         if (lhVal === null) return { brandSlug: b.slug, display: "—", rating: null, note: "Sem dados" };
@@ -136,7 +143,7 @@ export function CompareTable({ brands, snapshots }: CompareTableProps) {
     }),
   }));
 
-  // ── Lighthouse rows (only for brands with lighthouse data) ──
+  // ── Lighthouse rows ──
   const lighthouseFields = [
     { key: "performance", label: "Performance" },
     { key: "accessibility", label: "Acessibilidade" },
@@ -144,7 +151,7 @@ export function CompareTable({ brands, snapshots }: CompareTableProps) {
     { key: "seo", label: "SEO (Lighthouse)" },
   ];
 
-  const lighthouseRows: TableRow[] = lighthouseFields.map((field) => ({
+  const lighthouseRows: MetricRow[] = lighthouseFields.map((field) => ({
     label: field.label,
     category: "lighthouse",
     values: brands.map((b) => {
@@ -159,7 +166,7 @@ export function CompareTable({ brands, snapshots }: CompareTableProps) {
   }));
 
   // ── Finding counts ──
-  const findingRows: TableRow[] = [
+  const findingRows: MetricRow[] = [
     {
       label: "Críticos",
       category: "findings",
@@ -190,7 +197,7 @@ export function CompareTable({ brands, snapshots }: CompareTableProps) {
   ];
 
   // ── Platform info ──
-  const infoRows: TableRow[] = [
+  const infoRows: MetricRow[] = [
     {
       label: "Plataforma",
       category: "info",
@@ -223,59 +230,55 @@ export function CompareTable({ brands, snapshots }: CompareTableProps) {
   ];
 
   return (
-    <div className="card overflow-hidden">
+    <Card className="overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          {/* Header with brand names */}
-          <thead>
-            <tr className="border-b border-[var(--border-subtle)]">
-              <th className="text-left px-5 py-3.5 text-[var(--text-muted)] text-metric text-[10px] w-48">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="text-metric text-[10px] w-48">
                 MÉTRICA
-              </th>
+              </TableHead>
               {brands.map((brand) => (
-                <th key={brand.slug} className="text-center px-4 py-3.5 min-w-[140px]">
+                <TableHead key={brand.slug} className="text-center min-w-[140px]">
                   <div className="flex flex-col items-center gap-1">
                     <span
                       className="w-3 h-3 rounded-full"
                       style={{ backgroundColor: brand.color || "#8021de" }}
                     />
-                    <span className="text-sm font-semibold text-[var(--text-primary)]">
+                    <span className="text-sm font-semibold text-foreground">
                       {brand.name}
                     </span>
-                    <span className="text-metric text-[9px] text-[var(--text-muted)]">
+                    <span className="text-metric text-[9px] text-muted-foreground">
                       {brand.domain}
                     </span>
                   </div>
-                </th>
+                </TableHead>
               ))}
-            </tr>
-          </thead>
+            </TableRow>
+          </TableHeader>
 
-          <tbody>
+          <TableBody>
             {allSections.map((section) => (
               <React.Fragment key={section.title}>
                 {/* Section header */}
-                <tr>
-                  <td
+                <TableRow className="hover:bg-transparent">
+                  <TableCell
                     colSpan={brands.length + 1}
-                    className="px-5 pt-5 pb-2 text-metric text-[10px] text-[var(--text-muted)]"
+                    className="pt-5 pb-2 text-metric text-[10px] text-muted-foreground bg-muted/30"
                   >
                     {section.title}
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
 
                 {/* Rows */}
                 {section.rows.map((row) => {
                   const bestIdx = getBestIndex(row.values);
 
                   return (
-                    <tr
-                      key={row.label}
-                      className="border-b border-[var(--border-subtle)] last:border-b-0 hover:bg-[var(--bg-surface-alt)] transition-colors"
-                    >
-                      <td className="px-5 py-3 text-[var(--text-secondary)]">
+                    <TableRow key={row.label}>
+                      <TableCell className="text-muted-foreground">
                         {row.label}
-                      </td>
+                      </TableCell>
                       {row.values.map((val, i) => {
                         const isBest =
                           i === bestIdx &&
@@ -283,7 +286,7 @@ export function CompareTable({ brands, snapshots }: CompareTableProps) {
                           row.values.filter((v) => v.display !== "—").length > 1;
 
                         return (
-                          <td key={val.brandSlug} className="text-center px-4 py-3">
+                          <TableCell key={val.brandSlug} className="text-center">
                             <div className="flex flex-col items-center gap-0.5">
                               <span
                                 className="font-mono text-base"
@@ -291,13 +294,13 @@ export function CompareTable({ brands, snapshots }: CompareTableProps) {
                                   fontFamily: "var(--font-family-mono)",
                                   color: val.rating
                                     ? getRatingColor(val.rating)
-                                    : "var(--text-primary)",
+                                    : "inherit",
                                 }}
                               >
                                 {val.display}
                               </span>
                               {val.note && (
-                                <span className="text-[10px] text-[var(--text-muted)]">
+                                <span className="text-[10px] text-muted-foreground">
                                   {val.note}
                                 </span>
                               )}
@@ -307,17 +310,17 @@ export function CompareTable({ brands, snapshots }: CompareTableProps) {
                                 </span>
                               )}
                             </div>
-                          </td>
+                          </TableCell>
                         );
                       })}
-                    </tr>
+                    </TableRow>
                   );
                 })}
               </React.Fragment>
             ))}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
-    </div>
+    </Card>
   );
 }

@@ -290,6 +290,152 @@ export const recommendations = pgTable(
 );
 
 // ═══════════════════════════════════════════════
+// SEARCH CONSOLE (Google Search Console API)
+// ═══════════════════════════════════════════════
+
+export const searchConsoleSnapshots = pgTable(
+  "search_console_snapshots",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => createId()),
+    brandId: text("brand_id")
+      .notNull()
+      .references(() => brands.id, { onDelete: "cascade" }),
+    date: timestamp("date", { withTimezone: true }).notNull(),
+    query: text("query").notNull().default(""),
+    page: text("page").notNull().default(""),
+    clicks: integer("clicks").notNull().default(0),
+    impressions: integer("impressions").notNull().default(0),
+    ctr: real("ctr").notNull().default(0),
+    position: real("position").notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index("sc_brand_date_idx").on(table.brandId, table.date),
+    uniqueIndex("sc_brand_date_query_page_uq").on(
+      table.brandId,
+      table.date,
+      table.query,
+      table.page
+    ),
+  ]
+);
+
+// ═══════════════════════════════════════════════
+// KEYWORD SUGGESTIONS (Datamuse API)
+// ═══════════════════════════════════════════════
+
+export const keywordSuggestions = pgTable(
+  "keyword_suggestions",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => createId()),
+    brandId: text("brand_id")
+      .notNull()
+      .references(() => brands.id, { onDelete: "cascade" }),
+    keyword: text("keyword").notNull(),
+    suggestion: text("suggestion").notNull(),
+    score: integer("score").notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index("kw_brand_keyword_idx").on(table.brandId, table.keyword),
+    uniqueIndex("kw_brand_keyword_suggestion_uq").on(
+      table.brandId,
+      table.keyword,
+      table.suggestion
+    ),
+  ]
+);
+
+// ═══════════════════════════════════════════════
+// REDDIT MENTIONS
+// ═══════════════════════════════════════════════
+
+export const redditMentions = pgTable(
+  "reddit_mentions",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => createId()),
+    brandId: text("brand_id")
+      .notNull()
+      .references(() => brands.id, { onDelete: "cascade" }),
+    title: text("title").notNull(),
+    subreddit: text("subreddit").notNull(),
+    url: text("url").notNull(),
+    score: integer("score").notNull().default(0),
+    numComments: integer("num_comments").notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index("reddit_brand_created_idx").on(table.brandId, table.createdAt),
+    uniqueIndex("reddit_brand_url_uq").on(table.brandId, table.url),
+  ]
+);
+
+// ═══════════════════════════════════════════════
+// AEO QUESTIONS (StackExchange API)
+// ═══════════════════════════════════════════════
+
+export const aeoQuestions = pgTable(
+  "aeo_questions",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => createId()),
+    brandId: text("brand_id")
+      .notNull()
+      .references(() => brands.id, { onDelete: "cascade" }),
+    question: text("question").notNull(),
+    link: text("link").notNull(),
+    score: integer("score").notNull().default(0),
+    viewCount: integer("view_count").notNull().default(0),
+    answerCount: integer("answer_count").notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index("aeo_brand_created_idx").on(table.brandId, table.createdAt),
+    uniqueIndex("aeo_brand_link_uq").on(table.brandId, table.link),
+  ]
+);
+
+// ═══════════════════════════════════════════════
+// BRAND ENTITIES (Wikipedia)
+// ═══════════════════════════════════════════════
+
+export const brandEntities = pgTable(
+  "brand_entities",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => createId()),
+    brandId: text("brand_id")
+      .notNull()
+      .references(() => brands.id, { onDelete: "cascade" }),
+    title: text("title").notNull(),
+    url: text("url").notNull(),
+    extract: text("extract"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("entity_brand_uq").on(table.brandId),
+  ]
+);
+
+// ═══════════════════════════════════════════════
 // RELATIONS (Drizzle query builder)
 // ═══════════════════════════════════════════════
 
@@ -316,6 +462,11 @@ export const brandsRelations = relations(brands, ({ one, many }) => ({
   snapshots: many(snapshots),
   findings: many(findings),
   recommendations: many(recommendations),
+  searchConsoleSnapshots: many(searchConsoleSnapshots),
+  keywordSuggestions: many(keywordSuggestions),
+  redditMentions: many(redditMentions),
+  aeoQuestions: many(aeoQuestions),
+  brandEntities: many(brandEntities),
 }));
 
 export const profilesRelations = relations(profiles, ({ one, many }) => ({
@@ -385,6 +536,47 @@ export const recommendationsRelations = relations(
   })
 );
 
+export const searchConsoleSnapshotsRelations = relations(
+  searchConsoleSnapshots,
+  ({ one }) => ({
+    brand: one(brands, {
+      fields: [searchConsoleSnapshots.brandId],
+      references: [brands.id],
+    }),
+  })
+);
+
+export const keywordSuggestionsRelations = relations(
+  keywordSuggestions,
+  ({ one }) => ({
+    brand: one(brands, {
+      fields: [keywordSuggestions.brandId],
+      references: [brands.id],
+    }),
+  })
+);
+
+export const redditMentionsRelations = relations(redditMentions, ({ one }) => ({
+  brand: one(brands, {
+    fields: [redditMentions.brandId],
+    references: [brands.id],
+  }),
+}));
+
+export const aeoQuestionsRelations = relations(aeoQuestions, ({ one }) => ({
+  brand: one(brands, {
+    fields: [aeoQuestions.brandId],
+    references: [brands.id],
+  }),
+}));
+
+export const brandEntitiesRelations = relations(brandEntities, ({ one }) => ({
+  brand: one(brands, {
+    fields: [brandEntities.brandId],
+    references: [brands.id],
+  }),
+}));
+
 // ═══════════════════════════════════════════════
 // TIPOS INFERIDOS (para usar no app)
 // ═══════════════════════════════════════════════
@@ -412,6 +604,22 @@ export type NewFinding = typeof findings.$inferInsert;
 
 export type Recommendation = typeof recommendations.$inferSelect;
 export type NewRecommendation = typeof recommendations.$inferInsert;
+
+export type SearchConsoleSnapshot = typeof searchConsoleSnapshots.$inferSelect;
+export type NewSearchConsoleSnapshot =
+  typeof searchConsoleSnapshots.$inferInsert;
+
+export type KeywordSuggestion = typeof keywordSuggestions.$inferSelect;
+export type NewKeywordSuggestion = typeof keywordSuggestions.$inferInsert;
+
+export type RedditMention = typeof redditMentions.$inferSelect;
+export type NewRedditMention = typeof redditMentions.$inferInsert;
+
+export type AeoQuestion = typeof aeoQuestions.$inferSelect;
+export type NewAeoQuestion = typeof aeoQuestions.$inferInsert;
+
+export type BrandEntity = typeof brandEntities.$inferSelect;
+export type NewBrandEntity = typeof brandEntities.$inferInsert;
 
 // ═══════════════════════════════════════════════
 // ENUMS (type-safe no app, não no banco)

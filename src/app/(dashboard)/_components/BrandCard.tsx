@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { ScoreRing } from "@/components/charts/ScoreRing";
 import { ExternalLink, AlertTriangle, CheckCircle, AlertCircle } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import type { BrandSummary } from "@/types";
 
 interface BrandCardProps {
@@ -15,27 +17,27 @@ export function BrandCard({ brand }: BrandCardProps) {
       href={`/dashboard/${brand.slug}`}
       className="block group focus:outline-none focus-visible:ring-2 focus-visible:ring-purple focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-primary)] rounded-[var(--radius-card)]"
     >
-      <div className="card p-0 transition-transform duration-[var(--transition-fast)] group-hover:scale-[1.02]">
+      <Card className="overflow-hidden transition-all duration-[var(--transition-fast)] group-hover:scale-[1.02] group-hover:shadow-[var(--shadow-card-hover)] group-hover:border-purple/30">
         {/* Barra colorida no topo */}
         <div className="h-[3px]" style={{ background: brand.gradient || "var(--color-purple)" }} />
 
-        <div className="p-6">
+        <CardContent className="p-6">
           {/* Header: nome + plataforma */}
           <div className="flex items-start justify-between mb-6">
             <div>
               <h3 className="text-heading-md text-lg">{brand.name}</h3>
-              <p className="text-metric text-[10px] text-[var(--text-muted)] mt-0.5">
+              <p className="text-metric text-[10px] text-muted-foreground mt-0.5">
                 {brand.domain}
               </p>
               {brand.platform && (
-                <p className="text-xs text-[var(--text-secondary)] mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   {brand.platform}
                 </p>
               )}
             </div>
             <ExternalLink
               size={14}
-              className="text-[var(--text-muted)] opacity-0 group-hover:opacity-100 transition-opacity"
+              className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity"
             />
           </div>
 
@@ -72,7 +74,8 @@ export function BrandCard({ brand }: BrandCardProps) {
           </div>
 
           {/* Finding counts */}
-          <div className="flex items-center gap-4 pt-4 border-t border-[var(--border-subtle)]">
+          <Separator className="mb-4" />
+          <div className="flex items-center gap-4">
             <div className="flex items-center gap-1.5">
               <AlertTriangle size={13} className="text-status-bad" />
               <span className="text-metric text-[11px] text-status-bad">
@@ -92,8 +95,8 @@ export function BrandCard({ brand }: BrandCardProps) {
               </span>
             </div>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </Link>
   );
 }

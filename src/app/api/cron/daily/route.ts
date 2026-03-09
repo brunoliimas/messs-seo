@@ -1,19 +1,48 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db, schema } from "@/lib/db";
+import { db } from "@/lib/db";
+import { collectRedditMentions } from "@/lib/collectors/reddit";
+import { collectKeywordSuggestions } from "@/lib/collectors/datamuse";
+import { persistPageSpeedBothStrategies } from "@/lib/collectors/persistPageSpeed";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /**
- * Cron diário — coleta Lighthouse/PageSpeed de todas as marcas
+ * Cron diário
  * Chamado pelo Vercel Cron às 09:00 UTC
- * Também pode ser chamado manualmente via /admin/collect
+ *
+ * Daily:
+ * - Reddit mentions
+ * - Keyword discovery (Datamuse)
+ * - PageSpeed Insights (Lighthouse) — mobile + desktop por marca
  */
 export async function GET(request: NextRequest) {
   // ── Verificar autenticação do cron ──
-  const authHeader = request.headers.get("authorization");
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const authHeader = request.headers.get("authorization")?.trim();
+  const secret = process.env.CRON_SECRET?.trim();
+  const expected = secret ? `Bearer ${secret}` : null;
+
+  if (!expected || authHeader !== expected) {
+    const receivedToken = authHeader?.startsWith("Bearer ")
+      ? authHeader.slice(7)
+      : authHeader ?? "";
+    return NextResponse.json(
+      {
+        error: "Unauthorized",
+        debug: {
+          cronSecretSet: !!secret,
+          authHeaderPresent: !!authHeader,
+          secretLength: secret?.length ?? 0,
+          receivedTokenLength: receivedToken.length,
+          hint: !secret
+            ? "CRON_SECRET não está definido. Adicione no .env.local e reinicie o servidor."
+            : !authHeader
+              ? "Header Authorization ausente. Use: -H \"Authorization: Bearer SEU_CRON_SECRET\""
+              : "Valor do Bearer não confere com CRON_SECRET. Confira espaços e aspas no .env.local.",
+        },
+      },
+      { status: 401 }
+    );
   }
 
   try {
@@ -26,42 +55,77 @@ export async function GET(request: NextRequest) {
 
     const results: {
       brand: string;
-      strategy: string;
+      job: "reddit" | "keywords" | "pagespeed";
       status: "ok" | "error";
+      inserted?: number;
       error?: string;
     }[] = [];
 
     for (const brand of brands) {
-      for (const strategy of ["mobile", "desktop"] as const) {
-        try {
-          // TODO: Implementar coleta real na Fase 2
-          // const data = await collectPageSpeed({
-          //   url: `https://${brand.domain}`,
-          //   strategy,
-          //   categories: ['performance', 'accessibility', 'best-practices', 'seo'],
-          // });
-          //
-          // await db.insert(schema.snapshots).values({
-          //   brandId: brand.id,
-          //   source: 'pagespeed',
-          //   strategy,
-          //   url: `https://${brand.domain}`,
-          //   performanceScore: data.lighthouse.performance,
-          //   ...
-          // });
+      // Reddit
+      try {
+        const r = await collectRedditMentions({
+          brandId: brand.id,
+          query: brand.name,
+          limit: 25,
+          sort: "new",
+        });
+        results.push({
+          brand: brand.name,
+          job: "reddit",
+          status: "ok",
+          inserted: r.inserted,
+        });
+      } catch (error) {
+        results.push({
+          brand: brand.name,
+          job: "reddit",
+          status: "error",
+          error: String(error),
+        });
+      }
 
-          results.push({ brand: brand.name, strategy, status: "ok" });
-        } catch (error) {
-          results.push({
-            brand: brand.name,
-            strategy,
-            status: "error",
-            error: String(error),
-          });
-        }
+      // Datamuse (keywords relacionadas)
+      try {
+        const k = await collectKeywordSuggestions({
+          brandId: brand.id,
+          keyword: brand.name,
+          limit: 40,
+        });
+        results.push({
+          brand: brand.name,
+          job: "keywords",
+          status: "ok",
+          inserted: k.inserted,
+        });
+      } catch (error) {
+        results.push({
+          brand: brand.name,
+          job: "keywords",
+          status: "error",
+          error: String(error),
+        });
+      }
 
-        // Rate limiting — 1.5s entre chamadas
-        await new Promise((r) => setTimeout(r, 1500));
+      // PageSpeed Insights (Lighthouse) — mobile + desktop
+      try {
+        const p = await persistPageSpeedBothStrategies({
+          brandId: brand.id,
+          url: `https://${brand.domain}`,
+        });
+        results.push({
+          brand: brand.name,
+          job: "pagespeed",
+          status: "ok",
+          inserted: p.inserted,
+        });
+      } catch (error) {
+        results.push({
+          brand: brand.name,
+          job: "pagespeed",
+          status: "error",
+          error: String(error),
+        });
       }
     }
 

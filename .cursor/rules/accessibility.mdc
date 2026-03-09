@@ -1,0 +1,10 @@
+---
+alwaysApply: true
+---
+All UI must follow accessibility best practices.
+
+Ensure:
+- semantic HTML
+- accessible labels
+- keyboard navigation
+- color contrast

@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { FindingBadge } from "@/components/shared/FindingBadge";
 import { ChevronDown, ChevronRight } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import type { Finding } from "@/lib/db/schema";
 
 type MockFinding = Pick<Finding, "type" | "category" | "text" | "resolved">;
@@ -55,7 +57,7 @@ export function FindingsPanel({ findings, brandColor }: FindingsPanelProps) {
     <div className="space-y-4">
       <div className="flex items-center gap-3">
         <h3 className="text-heading-md text-base">Achados da Auditoria</h3>
-        <span className="text-metric text-[10px] text-[var(--text-muted)]">
+        <span className="text-metric text-[10px] text-muted-foreground">
           {findings.length} ITENS
         </span>
       </div>
@@ -66,11 +68,11 @@ export function FindingsPanel({ findings, brandColor }: FindingsPanelProps) {
         const isExpanded = expandedSections.has(type);
 
         return (
-          <div key={type} className="card overflow-hidden">
+          <Card key={type} className="overflow-hidden">
             {/* Section header */}
             <button
               onClick={() => toggleSection(type)}
-              className="flex items-center justify-between w-full px-5 py-3.5 hover:bg-[var(--bg-surface-alt)] transition-colors cursor-pointer"
+              className="flex items-center justify-between w-full px-5 py-3.5 hover:bg-muted/50 transition-colors cursor-pointer"
             >
               <div className="flex items-center gap-3">
                 {isExpanded ? (
@@ -98,29 +100,26 @@ export function FindingsPanel({ findings, brandColor }: FindingsPanelProps) {
 
             {/* Items */}
             {isExpanded && (
-              <div className="border-t border-[var(--border-subtle)]">
+              <>
+                <Separator />
                 {items.map((finding, i) => (
-                  <div
-                    key={i}
-                    className={`px-5 py-4 ${
-                      i < items.length - 1
-                        ? "border-b border-[var(--border-subtle)]"
-                        : ""
-                    }`}
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className="shrink-0 mt-0.5">
-                        <FindingBadge type={type as any} label={categoryLabels[finding.category] || finding.category} />
+                  <div key={i}>
+                    <div className="px-5 py-4">
+                      <div className="flex items-start gap-3">
+                        <div className="shrink-0 mt-0.5">
+                          <FindingBadge type={type as any} label={categoryLabels[finding.category] || finding.category} />
+                        </div>
+                        <p className="text-sm text-muted-foreground leading-relaxed">
+                          {finding.text}
+                        </p>
                       </div>
-                      <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
-                        {finding.text}
-                      </p>
                     </div>
+                    {i < items.length - 1 && <Separator />}
                   </div>
                 ))}
-              </div>
+              </>
             )}
-          </div>
+          </Card>
         );
       })}
     </div>

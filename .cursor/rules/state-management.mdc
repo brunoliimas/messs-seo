@@ -1,0 +1,9 @@
+---
+alwaysApply: true
+---
+
+State should be minimal and predictable.
+
+Prefer:
+- local state when possible
+- avoiding unnecessary global state

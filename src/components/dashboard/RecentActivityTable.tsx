@@ -1,4 +1,12 @@
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { FindingBadge } from "@/components/shared/FindingBadge";
 
 export interface RecentActivityItem {
@@ -16,56 +24,40 @@ interface RecentActivityTableProps {
 function TableContent({ items }: { items: RecentActivityItem[] }) {
   if (items.length === 0) {
     return (
-      <p className="text-sm text-[var(--text-muted)] text-center py-8 px-6">
+      <p className="text-sm text-muted-foreground text-center py-8 px-6">
         Nenhuma atividade recente.
       </p>
     );
   }
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full" role="grid">
-        <thead>
-          <tr className="border-b border-[var(--border-subtle)] bg-[var(--bg-surface-alt)]">
-            <th
-              scope="col"
-              className="text-left px-6 py-4 text-metric text-[11px] font-medium text-[var(--text-muted)] uppercase tracking-wider"
-            >
-              Marca
-            </th>
-            <th
-              scope="col"
-              className="text-left px-6 py-4 text-metric text-[11px] font-medium text-[var(--text-muted)] uppercase tracking-wider"
-            >
-              Achado
-            </th>
-            <th
-              scope="col"
-              className="text-left px-6 py-4 text-metric text-[11px] font-medium text-[var(--text-muted)] uppercase tracking-wider w-28"
-            >
-              Tipo
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {items.map((item, i) => (
-            <tr
-              key={`${item.brandName}-${i}`}
-              className="border-b border-[var(--border-subtle)] last:border-b-0 hover:bg-[var(--bg-surface-alt)] transition-colors duration-[var(--transition-fast)]"
-            >
-              <td className="px-6 py-4 text-sm font-medium text-[var(--text-primary)]">
-                {item.brandName}
-              </td>
-              <td className="px-6 py-4 text-sm text-[var(--text-secondary)] max-w-md">
-                <span className="line-clamp-2">{item.description}</span>
-              </td>
-              <td className="px-6 py-4">
-                <FindingBadge type={item.type} size="sm" />
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead className="text-metric text-[11px] uppercase tracking-wider">
+            Marca
+          </TableHead>
+          <TableHead className="text-metric text-[11px] uppercase tracking-wider">
+            Achado
+          </TableHead>
+          <TableHead className="text-metric text-[11px] uppercase tracking-wider w-28">
+            Tipo
+          </TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {items.map((item, i) => (
+          <TableRow key={`${item.brandName}-${i}`}>
+            <TableCell className="font-medium">{item.brandName}</TableCell>
+            <TableCell className="text-muted-foreground max-w-md">
+              <span className="line-clamp-2">{item.description}</span>
+            </TableCell>
+            <TableCell>
+              <FindingBadge type={item.type} size="sm" />
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
   );
 }
 

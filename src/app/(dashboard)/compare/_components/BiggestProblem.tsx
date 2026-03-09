@@ -30,7 +30,7 @@ export function BiggestProblem({ brands, findings }: BiggestProblemProps) {
         </span>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {brands.map((brand) => {
           const brandFindings = findings[brand.slug] || [];
           const critical = brandFindings.find((f) => f.type === "critical");

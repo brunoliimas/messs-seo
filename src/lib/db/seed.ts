@@ -92,7 +92,7 @@ async function seed() {
     },
     {
       id: ids.alastin,
-      name: "ALASTIN Skincare",
+      name: "Alastin Skincare",
       domain: "alastin.com.br",
       slug: "alastin",
       clientId: ids.client,

@@ -1,0 +1,27 @@
+---
+alwaysApply: true
+---
+Frontend code must follow senior-level engineering standards.
+
+Prefer:
+
+- small reusable components
+- clear layout separation
+- predictable folder structure
+- readable JSX
+
+Avoid:
+
+- deeply nested components
+- duplicated UI patterns
+- unnecessary wrappers
+
+Code must be:
+- readable
+- maintainable
+- modular
+
+Prefer:
+- composition over inheritance
+- small components
+- clear props interfaces

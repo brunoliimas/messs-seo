@@ -19,10 +19,7 @@ export function MetricCard({
   const color = getRatingColor(rating);
 
   return (
-    <div
-      className="card overflow-hidden"
-      style={{ borderColor: `${color}20` }}
-    >
+    <div className="card overflow-hidden">
       {/* Top bar with rating color */}
       <div className="h-[2px]" style={{ backgroundColor: color }} />
 
