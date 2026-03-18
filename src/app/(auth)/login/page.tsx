@@ -57,7 +57,23 @@ function LoginFormInner() {
   }
 
   return (
-    <div className="login-bg min-h-screen flex flex-col items-center justify-center animate-fade-in" style={{ padding: "48px 24px", gap: "24px" }}>
+    <div
+      className="login-bg min-h-screen flex flex-col items-center justify-center animate-fade-in"
+      style={{
+        padding: "48px 24px",
+        gap: "24px",
+        background: `
+          linear-gradient(
+            135deg,
+            #f2f0ee 0%,
+            #a347ff 40%,
+            #9a46ed 50%,
+            #a347ff 60%,
+            #f2f0ee 100%
+          )
+        `,
+      }}
+    >
       {/* Logo */}
       <div className="flex flex-col items-center" style={{ gap: "8px" }}>
         <Logo size={140} color="#ffffff" />
@@ -162,7 +178,7 @@ function LoginFormInner() {
       </Card>
 
       <p style={{ fontSize: "12px", color: "rgba(255,255,255,0.35)", letterSpacing: "0.15em" }}>
-        messs.com.br
+        <a href="http://messs.com.br" target="_blank" rel="noopener noreferrer">messs.com.br</a>
       </p>
     </div>
   );
