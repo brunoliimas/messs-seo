@@ -137,6 +137,11 @@ ALTER TABLE public.audits ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.snapshots ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.findings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.recommendations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.search_console_snapshots ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.keyword_suggestions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.reddit_mentions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.aeo_questions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.brand_entities ENABLE ROW LEVEL SECURITY;
 
 
 -- ═══════════════════════════════════════════════════════════════════════════
@@ -306,6 +311,102 @@ CREATE POLICY "rec_insert" ON public.recommendations
 
 -- Analyst e admin podem atualizar status
 CREATE POLICY "rec_update" ON public.recommendations
+  FOR UPDATE USING (
+    public.get_user_role() IN ('admin', 'analyst')
+    AND public.user_has_brand_access(brand_id)
+  );
+
+
+-- ── SEARCH CONSOLE SNAPSHOTS ──
+CREATE POLICY "sc_select" ON public.search_console_snapshots
+  FOR SELECT USING (
+    public.user_has_brand_access(brand_id)
+  );
+
+-- Escrita apenas por admin/analyst (ou via service_role/cron, que bypassa RLS)
+CREATE POLICY "sc_insert" ON public.search_console_snapshots
+  FOR INSERT WITH CHECK (
+    public.get_user_role() IN ('admin', 'analyst')
+    AND public.user_has_brand_access(brand_id)
+  );
+
+CREATE POLICY "sc_update" ON public.search_console_snapshots
+  FOR UPDATE USING (
+    public.get_user_role() IN ('admin', 'analyst')
+    AND public.user_has_brand_access(brand_id)
+  );
+
+
+-- ── KEYWORD SUGGESTIONS ──
+CREATE POLICY "kw_select" ON public.keyword_suggestions
+  FOR SELECT USING (
+    public.user_has_brand_access(brand_id)
+  );
+
+CREATE POLICY "kw_insert" ON public.keyword_suggestions
+  FOR INSERT WITH CHECK (
+    public.get_user_role() IN ('admin', 'analyst')
+    AND public.user_has_brand_access(brand_id)
+  );
+
+CREATE POLICY "kw_update" ON public.keyword_suggestions
+  FOR UPDATE USING (
+    public.get_user_role() IN ('admin', 'analyst')
+    AND public.user_has_brand_access(brand_id)
+  );
+
+
+-- ── REDDIT MENTIONS ──
+CREATE POLICY "reddit_select" ON public.reddit_mentions
+  FOR SELECT USING (
+    public.user_has_brand_access(brand_id)
+  );
+
+CREATE POLICY "reddit_insert" ON public.reddit_mentions
+  FOR INSERT WITH CHECK (
+    public.get_user_role() IN ('admin', 'analyst')
+    AND public.user_has_brand_access(brand_id)
+  );
+
+CREATE POLICY "reddit_update" ON public.reddit_mentions
+  FOR UPDATE USING (
+    public.get_user_role() IN ('admin', 'analyst')
+    AND public.user_has_brand_access(brand_id)
+  );
+
+
+-- ── AEO QUESTIONS ──
+CREATE POLICY "aeo_select" ON public.aeo_questions
+  FOR SELECT USING (
+    public.user_has_brand_access(brand_id)
+  );
+
+CREATE POLICY "aeo_insert" ON public.aeo_questions
+  FOR INSERT WITH CHECK (
+    public.get_user_role() IN ('admin', 'analyst')
+    AND public.user_has_brand_access(brand_id)
+  );
+
+CREATE POLICY "aeo_update" ON public.aeo_questions
+  FOR UPDATE USING (
+    public.get_user_role() IN ('admin', 'analyst')
+    AND public.user_has_brand_access(brand_id)
+  );
+
+
+-- ── BRAND ENTITIES ──
+CREATE POLICY "entity_select" ON public.brand_entities
+  FOR SELECT USING (
+    public.user_has_brand_access(brand_id)
+  );
+
+CREATE POLICY "entity_insert" ON public.brand_entities
+  FOR INSERT WITH CHECK (
+    public.get_user_role() IN ('admin', 'analyst')
+    AND public.user_has_brand_access(brand_id)
+  );
+
+CREATE POLICY "entity_update" ON public.brand_entities
   FOR UPDATE USING (
     public.get_user_role() IN ('admin', 'analyst')
     AND public.user_has_brand_access(brand_id)
