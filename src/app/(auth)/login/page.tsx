@@ -58,21 +58,8 @@ function LoginFormInner() {
 
   return (
     <div
-      className="login-bg min-h-screen flex flex-col items-center justify-center animate-fade-in"
-      style={{
-        padding: "48px 24px",
-        gap: "24px",
-        background: `
-          linear-gradient(
-            135deg,
-            #f2f0ee 0%,
-            #a347ff 40%,
-            #9a46ed 50%,
-            #a347ff 60%,
-            #f2f0ee 100%
-          )
-        `,
-      }}
+      className="login-bg min-h-screen flex flex-col items-center justify-center animate-fade-in gap-6 bg-[url('/background.png')] bg-cover bg-center"
+      
     >
       {/* Logo */}
       <div className="flex flex-col items-center" style={{ gap: "8px" }}>
@@ -154,7 +141,7 @@ function LoginFormInner() {
                   disabled={loading || !email}
                   size="lg"
                   className="w-full font-semibold"
-                  style={{ height: "44px", backgroundColor: "#6366f1", color: "#fff" }}
+                  style={{ height: "44px", backgroundColor: "#8021de", color: "#fff" }}
                 >
                   {loading ? (
                     <>
