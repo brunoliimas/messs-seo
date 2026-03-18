@@ -27,6 +27,22 @@ export const MOCK_BRANDS: BrandSummary[] = [
     findingCounts: { critical: 3, warning: 4, good: 4 },
   },
   {
+    id: "galdermaaesthetics",
+    name: "Galderma Aesthetics Brasil",
+    slug: "galdermaaesthetics",
+    domain: "galdermaaesthetics.com.br",
+    platform: "Site institucional",
+    color: "#0ea5e9",
+    gradient: "linear-gradient(135deg, #0284c7, #0ea5e9)",
+    scores: {
+      cwv: { letter: "B+", numeric: 87 },
+      seo: { letter: "B", numeric: 83 },
+      aeo: { letter: "D+", numeric: 67 },
+      llm: { letter: "D", numeric: 63 },
+    },
+    findingCounts: { critical: 4, warning: 3, good: 2 },
+  },
+  {
     id: "dermotivin",
     name: "Dermotivin",
     slug: "dermotivin",
@@ -113,6 +129,30 @@ export const MOCK_SNAPSHOTS: Record<string, MockSnapshot[]> = {
       },
     },
   ],
+  galdermaaesthetics: [
+    {
+      source: "crux",
+      strategy: "mobile",
+      isOrigin: false,
+      date: "2026-03-02",
+      metrics: {
+        lcp: { value: 2100, rating: "good" },
+        inp: { value: 160, rating: "good" },
+        cls: { value: 0.06, rating: "good" },
+        ttfb: { value: 950, rating: "needs-improvement" },
+      },
+    },
+    {
+      source: "crux",
+      strategy: "desktop",
+      isOrigin: true,
+      date: "2026-03-02",
+      metrics: {
+        lcp: { value: 3100, rating: "needs-improvement" },
+        cls: { value: 0.04, rating: "good" },
+      },
+    },
+  ],
   dermotivin: [
     {
       source: "crux",
@@ -184,6 +224,17 @@ export const MOCK_FINDINGS: Record<string, MockFinding[]> = {
     { type: "good", category: "seo", text: "SSR ativo via Salesforce Commerce Cloud. Conteúdo renderizado no servidor — crawlers conseguem ler HTML completo sem executar JavaScript.", resolved: false },
     { type: "good", category: "seo", text: "Sitemap.xml e robots.txt bem configurados (exceto bloqueio de bots IA). Hierarquia de URLs limpa e indexação consistente.", resolved: false },
   ],
+  galdermaaesthetics: [
+    { type: "critical", category: "aeo", text: "Ausência de dados estruturados (JSON-LD) para FAQ/HowTo/MedicalEntity. Baixa chance de Featured Snippets e baixa legibilidade para IAs generativas.", resolved: false },
+    { type: "critical", category: "llm", text: "Conteúdo não otimizado para LLMs: falta de seções answer-first e páginas com estrutura semântica inconsistente. IAs têm dificuldade de extrair respostas e citar o domínio.", resolved: false },
+    { type: "critical", category: "seo", text: "Arquitetura de conteúdo focada em marca/produtos, mas com pouca cobertura de dúvidas e intenções informacionais. Perda de tráfego orgânico em topo de funil.", resolved: false },
+    { type: "critical", category: "cwv", text: "LCP com tendência a 'needs improvement' em algumas páginas (especialmente desktop). Otimização de imagens hero e priorização de recursos pode reduzir o p75.", resolved: false },
+    { type: "warning", category: "seo", text: "Titles e descriptions com oportunidades de melhoria para CTR: incluir benefício + procedimento/indicação, evitando padrões repetidos.", resolved: false },
+    { type: "warning", category: "aeo", text: "FAQ existente (quando presente) não está marcada com schema FAQPage; Google e IA não reconhecem o conteúdo como Q&A.", resolved: false },
+    { type: "warning", category: "performance", text: "Recursos render-blocking em páginas de campanha: CSS/JS acima da dobra atrasam FCP e podem impactar LCP em conexões móveis.", resolved: false },
+    { type: "good", category: "cwv", text: "CrUX disponível com dados mobile e desktop — sinal de tráfego suficiente e base boa para acompanhar evolução semanal.", resolved: false },
+    { type: "good", category: "seo", text: "Conteúdo científico e referências clínicas são um diferencial para E-E-A-T, especialmente em estética injetável.", resolved: false },
+  ],
   dermotivin: [
     { type: "critical", category: "llm", text: "BLOQUEIO TOTAL para crawlers de IA. Drupal renderiza 100% via client-side JavaScript. GPTBot, ClaudeBot e PerplexityBot recebem HTML vazio — zero conteúdo indexável por LLMs.", resolved: false },
     { type: "critical", category: "seo", text: "Client-Side Rendering (CSR) compromete SEO. Googlebot consegue renderizar JS, mas o processo é lento e nem todo conteúdo dinâmico é capturado. Risco de indexação incompleta.", resolved: false },
@@ -229,6 +280,12 @@ export const MOCK_RECOMMENDATIONS: Record<string, MockRecommendation[]> = {
     { priority: "medium", category: "aeo", text: "Marcar FAQs existentes com schema FAQPage. Google exibirá como rich result expandível e IAs citarão como fonte confiável.", timeline: "1-2 sem", status: "pending" },
     { priority: "medium", category: "cwv", text: "Investigar e reduzir TTFB: considerar CDN com edge caching no Brasil (Cloudflare/Fastly) para diminuir latência do SFCC.", timeline: "4-8 sem", status: "pending" },
     { priority: "low", category: "aeo", text: "Criar hub de conteúdo educacional: artigos sobre rotina de skincare, ingredientes, tipos de pele. Posiciona a marca para queries informacionais e aumenta citabilidade por IA.", timeline: "4-12 sem", status: "pending" },
+  ],
+  galdermaaesthetics: [
+    { priority: "critical", category: "aeo", text: "Implementar schema markup (JSON-LD): FAQPage, HowTo (quando aplicável), Organization e BreadcrumbList. Facilita rich results e extração por IA.", timeline: "1-2 sem", status: "pending" },
+    { priority: "critical", category: "llm", text: "Criar páginas answer-first para as 30 principais dúvidas (ex.: indicações, duração, pós-procedimento). Resposta direta no topo + seção detalhada com fontes.", timeline: "4-8 sem", status: "pending" },
+    { priority: "high", category: "cwv", text: "Otimizar LCP: comprimir/imagens hero em AVIF/WebP, preload de imagem principal e redução de render-blocking no head.", timeline: "1-2 sem", status: "pending" },
+    { priority: "high", category: "seo", text: "Expandir cobertura informacional (topo de funil): glossário de termos, páginas por intenção e cluster de conteúdos por procedimento/produto.", timeline: "4-12 sem", status: "pending" },
   ],
   dermotivin: [
     { priority: "critical", category: "llm", text: "Migrar de CSR para SSR/SSG. Opções: (1) habilitar Server-Side Rendering no Drupal, (2) usar Drupal como headless CMS com Next.js no frontend, (3) implementar pre-rendering/ISR. Sem isso, a marca continua invisível para 100% dos LLMs.", timeline: "8-16 sem", status: "pending" },

@@ -7,6 +7,7 @@
 // ============================================================================
 
 import { drizzle } from "drizzle-orm/postgres-js";
+import { eq, and } from "drizzle-orm";
 import postgres from "postgres";
 import { createId } from "@paralleldrive/cuid2";
 import {
@@ -28,17 +29,60 @@ if (!DATABASE_URL) {
 const connection = postgres(DATABASE_URL, { prepare: false });
 const db = drizzle(connection);
 
-// ── Helper: gerar IDs deterministicos para referência cruzada ──
-const ids = {
-  org: createId(),
-  client: createId(),
-  cetaphil: createId(),
-  dermotivin: createId(),
-  alastin: createId(),
+// ── IDs runtime (reaproveita registros existentes por slug) ──
+const ids: {
+  org: string;
+  client: string;
+  cetaphil: string;
+  galdermaaesthetics: string;
+  dermotivin: string;
+  alastin: string;
+  auditCetaphil: string;
+  auditGaldermaAesthetics: string;
+  auditDermotivin: string;
+  auditAlastin: string;
+} = {
+  org: "",
+  client: "",
+  cetaphil: "",
+  galdermaaesthetics: "",
+  dermotivin: "",
+  alastin: "",
   auditCetaphil: createId(),
+  auditGaldermaAesthetics: createId(),
   auditDermotivin: createId(),
   auditAlastin: createId(),
 };
+
+async function getOrgIdBySlug(slug: string): Promise<string | null> {
+  const rows = await db
+    .select({ id: organizations.id })
+    .from(organizations)
+    .where(eq(organizations.slug, slug))
+    .limit(1);
+  return rows[0]?.id ?? null;
+}
+
+async function getClientIdBySlug(slug: string): Promise<string | null> {
+  const rows = await db
+    .select({ id: clients.id })
+    .from(clients)
+    .where(eq(clients.slug, slug))
+    .limit(1);
+  return rows[0]?.id ?? null;
+}
+
+async function getBrandIdByClientAndSlug(params: {
+  clientId: string;
+  slug: string;
+}): Promise<string | null> {
+  const rows = await db
+    .select({ id: brands.id })
+    .from(brands)
+    .where(and(eq(brands.clientId, params.clientId), eq(brands.slug, params.slug)))
+    .limit(1);
+  return rows[0]?.id ?? null;
+}
 
 async function seed() {
   console.log("🌱 Iniciando seed...\n");
@@ -46,29 +90,44 @@ async function seed() {
   // ═══════════════════════════════════════════════
   // 1. ORGANIZAÇÃO
   // ═══════════════════════════════════════════════
-  console.log("📦 Criando organização MESSS...");
-  await db.insert(organizations).values({
-    id: ids.org,
-    name: "MESSS",
-    slug: "messs",
-    logoUrl: null,
-  });
+  console.log("📦 Garantindo organização MESSS...");
+  ids.org = (await getOrgIdBySlug("messs")) ?? createId();
+  await db
+    .insert(organizations)
+    .values({
+      id: ids.org,
+      name: "MESSS",
+      slug: "messs",
+      logoUrl: null,
+    })
+    .onConflictDoNothing();
+  ids.org = (await getOrgIdBySlug("messs")) ?? ids.org;
 
   // ═══════════════════════════════════════════════
   // 2. CLIENTE
   // ═══════════════════════════════════════════════
-  console.log("📦 Criando cliente Galderma Brasil...");
-  await db.insert(clients).values({
-    id: ids.client,
-    name: "Galderma Brasil",
-    slug: "galderma-br",
-    organizationId: ids.org,
-  });
+  console.log("📦 Garantindo cliente Galderma Brasil...");
+  ids.client = (await getClientIdBySlug("galderma-br")) ?? createId();
+  await db
+    .insert(clients)
+    .values({
+      id: ids.client,
+      name: "Galderma Brasil",
+      slug: "galderma-br",
+      organizationId: ids.org,
+    })
+    .onConflictDoNothing();
+  ids.client = (await getClientIdBySlug("galderma-br")) ?? ids.client;
 
   // ═══════════════════════════════════════════════
   // 3. MARCAS
   // ═══════════════════════════════════════════════
-  console.log("📦 Criando 3 marcas...");
+  console.log("📦 Garantindo 4 marcas...");
+  ids.cetaphil = (await getBrandIdByClientAndSlug({ clientId: ids.client, slug: "cetaphil" })) ?? createId();
+  ids.galdermaaesthetics = (await getBrandIdByClientAndSlug({ clientId: ids.client, slug: "galdermaaesthetics" })) ?? createId();
+  ids.dermotivin = (await getBrandIdByClientAndSlug({ clientId: ids.client, slug: "dermotivin" })) ?? createId();
+  ids.alastin = (await getBrandIdByClientAndSlug({ clientId: ids.client, slug: "alastin" })) ?? createId();
+
   await db.insert(brands).values([
     {
       id: ids.cetaphil,
@@ -79,6 +138,16 @@ async function seed() {
       platform: "Salesforce Commerce Cloud (Demandware)",
       color: "#8021de",
       gradient: "linear-gradient(135deg, #681bb5, #8021de)",
+    },
+    {
+      id: ids.galdermaaesthetics,
+      name: "Galderma Aesthetics Brasil",
+      domain: "galdermaaesthetics.com.br",
+      slug: "galdermaaesthetics",
+      clientId: ids.client,
+      platform: "Site institucional",
+      color: "#0ea5e9",
+      gradient: "linear-gradient(135deg, #0284c7, #0ea5e9)",
     },
     {
       id: ids.dermotivin,
@@ -100,7 +169,23 @@ async function seed() {
       color: "#4124b2",
       gradient: "linear-gradient(135deg, #411c87, #4124b2)",
     },
-  ]);
+  ]).onConflictDoNothing();
+
+  // Recarregar IDs (caso já existiam)
+  ids.cetaphil =
+    (await getBrandIdByClientAndSlug({ clientId: ids.client, slug: "cetaphil" })) ??
+    ids.cetaphil;
+  ids.galdermaaesthetics =
+    (await getBrandIdByClientAndSlug({
+      clientId: ids.client,
+      slug: "galdermaaesthetics",
+    })) ?? ids.galdermaaesthetics;
+  ids.dermotivin =
+    (await getBrandIdByClientAndSlug({ clientId: ids.client, slug: "dermotivin" })) ??
+    ids.dermotivin;
+  ids.alastin =
+    (await getBrandIdByClientAndSlug({ clientId: ids.client, slug: "alastin" })) ??
+    ids.alastin;
 
   // ═══════════════════════════════════════════════
   // 4. AUDITORIAS (scores normalizados)
@@ -123,6 +208,22 @@ async function seed() {
       aeoNumeric: LETTER_TO_NUMERIC["D"],
       llmNumeric: LETTER_TO_NUMERIC["D+"],
       notes: "Auditoria completa — CrUX com dados mobile e desktop. Desktop Origin tem CLS reprovado (0.18).",
+    },
+    {
+      id: ids.auditGaldermaAesthetics,
+      brandId: ids.galdermaaesthetics,
+      date: auditDate,
+      type: "full",
+      cwvScore: "B+",
+      seoScore: "B",
+      aeoScore: "D+",
+      llmScore: "D",
+      cwvNumeric: LETTER_TO_NUMERIC["B+"],
+      seoNumeric: LETTER_TO_NUMERIC["B"],
+      aeoNumeric: LETTER_TO_NUMERIC["D+"],
+      llmNumeric: LETTER_TO_NUMERIC["D"],
+      notes:
+        "Auditoria completa — galdermaaesthetics.com.br. Bom desempenho técnico com CrUX disponível; oportunidades em dados estruturados (Schema) e otimização para IAs generativas.",
     },
     {
       id: ids.auditDermotivin,
@@ -212,6 +313,47 @@ async function seed() {
       isOrigin: true,
       clsValue: 0.18,
       clsRating: "poor", // 56% good, threshold 75%
+    },
+
+    // ── GALDERMA AESTHETICS ──
+    // CrUX Mobile (URL)
+    {
+      id: createId(),
+      brandId: ids.galdermaaesthetics,
+      date: new Date("2026-03-02T00:00:00Z"),
+      source: "crux",
+      strategy: "mobile",
+      url: "https://galdermaaesthetics.com.br",
+      isOrigin: false,
+      lcpValue: 2100,
+      lcpRating: "good",
+      inpValue: 160,
+      inpRating: "good",
+      clsValue: 0.06,
+      clsRating: "good",
+      ttfbValue: 950,
+      ttfbRating: "needs-improvement",
+    },
+    // Lighthouse Lab Data Desktop
+    {
+      id: createId(),
+      brandId: ids.galdermaaesthetics,
+      date: new Date("2026-03-01T00:00:00Z"),
+      source: "lighthouse",
+      strategy: "desktop",
+      url: "https://galdermaaesthetics.com.br",
+      isOrigin: false,
+      performanceScore: 78,
+      accessibilityScore: 85,
+      bestPracticesScore: 96,
+      seoScore: 90,
+      fcpValue: 900,
+      lcpValue: 2800,
+      tbtValue: 180,
+      clsValue: 0.04,
+      speedIndex: 2600,
+      ttiValue: 3200,
+      ttfbValue: 600,
     },
 
     // ── DERMOTIVIN ──
@@ -376,6 +518,85 @@ async function seed() {
       type: "good",
       category: "seo",
       text: "Sitemap.xml e robots.txt bem configurados (exceto bloqueio de bots IA). Hierarquia de URLs limpa e indexação consistente.",
+    },
+  ]);
+
+  // ── GALDERMA AESTHETICS — 9 findings (4 critical, 3 warn, 2 good) ──
+  await db.insert(findings).values([
+    // Critical (4)
+    {
+      id: createId(),
+      brandId: ids.galdermaaesthetics,
+      auditId: ids.auditGaldermaAesthetics,
+      type: "critical",
+      category: "aeo",
+      text: "Ausência de dados estruturados (JSON-LD) para FAQ/HowTo/MedicalEntity. Baixa chance de Featured Snippets e baixa legibilidade para IAs generativas.",
+    },
+    {
+      id: createId(),
+      brandId: ids.galdermaaesthetics,
+      auditId: ids.auditGaldermaAesthetics,
+      type: "critical",
+      category: "llm",
+      text: "Conteúdo não otimizado para LLMs: falta de seções answer-first e estrutura semântica inconsistente. IAs têm dificuldade de extrair respostas e citar o domínio.",
+    },
+    {
+      id: createId(),
+      brandId: ids.galdermaaesthetics,
+      auditId: ids.auditGaldermaAesthetics,
+      type: "critical",
+      category: "seo",
+      text: "Cobertura informacional limitada para dúvidas e intenções topo de funil. Oportunidade de ampliar tráfego orgânico com clusters por procedimento/produto.",
+    },
+    {
+      id: createId(),
+      brandId: ids.galdermaaesthetics,
+      auditId: ids.auditGaldermaAesthetics,
+      type: "critical",
+      category: "cwv",
+      text: "LCP com tendência a needs-improvement em algumas páginas (especialmente desktop). Otimização de imagens hero e priorização de recursos pode reduzir o p75.",
+    },
+    // Warning (3)
+    {
+      id: createId(),
+      brandId: ids.galdermaaesthetics,
+      auditId: ids.auditGaldermaAesthetics,
+      type: "warning",
+      category: "seo",
+      text: "Titles e descriptions com oportunidades de melhoria para CTR: incluir benefício + procedimento/indicação, evitando padrões repetidos.",
+    },
+    {
+      id: createId(),
+      brandId: ids.galdermaaesthetics,
+      auditId: ids.auditGaldermaAesthetics,
+      type: "warning",
+      category: "aeo",
+      text: "FAQ existente (quando presente) não está marcada com schema FAQPage; Google e IA não reconhecem o conteúdo como Q&A.",
+    },
+    {
+      id: createId(),
+      brandId: ids.galdermaaesthetics,
+      auditId: ids.auditGaldermaAesthetics,
+      type: "warning",
+      category: "performance",
+      text: "Recursos render-blocking em páginas de campanha podem atrasar FCP e impactar LCP em conexões móveis.",
+    },
+    // Good (2)
+    {
+      id: createId(),
+      brandId: ids.galdermaaesthetics,
+      auditId: ids.auditGaldermaAesthetics,
+      type: "good",
+      category: "cwv",
+      text: "CrUX disponível com dados mobile e desktop — base sólida para acompanhar evolução semanal e medir impacto de otimizações.",
+    },
+    {
+      id: createId(),
+      brandId: ids.galdermaaesthetics,
+      auditId: ids.auditGaldermaAesthetics,
+      type: "good",
+      category: "seo",
+      text: "Conteúdo científico com referências clínicas fortalece E-E-A-T, especialmente em estética injetável.",
     },
   ]);
 
@@ -653,6 +874,50 @@ async function seed() {
       priority: "low",
       category: "aeo",
       text: "Criar hub de conteúdo educacional: artigos sobre rotina de skincare, ingredientes, tipos de pele. Posiciona a marca para queries informacionais e aumenta citabilidade por IA.",
+      timeline: "4-12 sem",
+      status: "pending",
+    },
+  ]);
+
+  // ── GALDERMA AESTHETICS — 4 recomendações ──
+  await db.insert(recommendations).values([
+    {
+      id: createId(),
+      brandId: ids.galdermaaesthetics,
+      auditId: ids.auditGaldermaAesthetics,
+      priority: "critical",
+      category: "aeo",
+      text: "Implementar schema markup (JSON-LD): FAQPage, HowTo (quando aplicável), Organization e BreadcrumbList. Facilita rich results e extração por IA.",
+      timeline: "1-2 sem",
+      status: "pending",
+    },
+    {
+      id: createId(),
+      brandId: ids.galdermaaesthetics,
+      auditId: ids.auditGaldermaAesthetics,
+      priority: "critical",
+      category: "llm",
+      text: "Criar páginas answer-first para as 30 principais dúvidas (indicações, duração, pós-procedimento). Resposta direta no topo + seção detalhada com fontes.",
+      timeline: "4-8 sem",
+      status: "pending",
+    },
+    {
+      id: createId(),
+      brandId: ids.galdermaaesthetics,
+      auditId: ids.auditGaldermaAesthetics,
+      priority: "high",
+      category: "cwv",
+      text: "Otimizar LCP: imagens hero em AVIF/WebP, preload da imagem principal e redução de render-blocking no head.",
+      timeline: "1-2 sem",
+      status: "pending",
+    },
+    {
+      id: createId(),
+      brandId: ids.galdermaaesthetics,
+      auditId: ids.auditGaldermaAesthetics,
+      priority: "high",
+      category: "seo",
+      text: "Expandir cobertura informacional: glossário de termos e clusters de conteúdo por procedimento/produto para capturar topo de funil.",
       timeline: "4-12 sem",
       status: "pending",
     },

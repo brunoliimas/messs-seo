@@ -21,9 +21,9 @@ export function ScoreSummary({ brands }: ScoreSummaryProps) {
         SCORES POR MARCA
       </p>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {brands.map((brand) => (
-          <div key={brand.slug}>
+          <div key={brand.slug} className="p-4 border border-border rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300">
             <div className="flex items-center gap-2 mb-4">
               <span
                 className="w-2.5 h-2.5 rounded-full shrink-0"

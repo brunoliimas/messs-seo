@@ -70,6 +70,10 @@ function getLighthouseValue(
 }
 
 export function CompareTable({ brands, snapshots }: CompareTableProps) {
+  const metricColWidth = "w-[180px]";
+  const brandColWidth = "w-[170px] min-w-[170px] max-w-[170px]";
+  const cellWrap = "whitespace-normal wrap-break-word break-normal";
+
   // ── Build score rows ──
   const scoreRows: MetricRow[] = [
     {
@@ -232,23 +236,26 @@ export function CompareTable({ brands, snapshots }: CompareTableProps) {
   return (
     <Card className="overflow-hidden">
       <div className="overflow-x-auto">
-        <Table>
+        <Table className="table-fixed">
           <TableHeader>
             <TableRow>
-              <TableHead className="text-metric text-[10px] w-48">
+              <TableHead className={`text-metric text-[10px] ${metricColWidth}`}>
                 MÉTRICA
               </TableHead>
               {brands.map((brand) => (
-                <TableHead key={brand.slug} className="text-center min-w-[140px]">
-                  <div className="flex flex-col items-center gap-1">
+                <TableHead
+                  key={brand.slug}
+                  className={`text-center ${brandColWidth} ${cellWrap}`}
+                >
+                  <div className={`flex flex-col items-center justify-center gap-1 w-full min-h-[64px] ${cellWrap}`}>
                     <span
                       className="w-3 h-3 rounded-full"
                       style={{ backgroundColor: brand.color || "#8021de" }}
                     />
-                    <span className="text-sm font-semibold text-foreground">
+                    <span className={`text-sm font-semibold text-foreground text-center ${cellWrap}`}>
                       {brand.name}
                     </span>
-                    <span className="text-metric text-[9px] text-muted-foreground">
+                    <span className={`text-metric text-[9px] text-muted-foreground text-center ${cellWrap}`}>
                       {brand.domain}
                     </span>
                   </div>
@@ -276,7 +283,7 @@ export function CompareTable({ brands, snapshots }: CompareTableProps) {
 
                   return (
                     <TableRow key={row.label}>
-                      <TableCell className="text-muted-foreground">
+                      <TableCell className={`text-muted-foreground ${metricColWidth} ${cellWrap}`}>
                         {row.label}
                       </TableCell>
                       {row.values.map((val, i) => {
@@ -286,12 +293,19 @@ export function CompareTable({ brands, snapshots }: CompareTableProps) {
                           row.values.filter((v) => v.display !== "—").length > 1;
 
                         return (
-                          <TableCell key={val.brandSlug} className="text-center">
-                            <div className="flex flex-col items-center gap-0.5">
+                          <TableCell key={val.brandSlug} className={`text-center ${brandColWidth} ${cellWrap}`}>
+                            <div className={`flex flex-col items-center gap-0.5 ${cellWrap}`}>
                               <span
-                                className="font-mono text-base"
+                                className={
+                                  row.category === "info" && row.label === "Plataforma"
+                                    ? `text-sm text-(--text-secondary) leading-snug text-center ${cellWrap}`
+                                    : `font-mono text-base text-center ${cellWrap}`
+                                }
                                 style={{
-                                  fontFamily: "var(--font-family-mono)",
+                                  fontFamily:
+                                    row.category === "info" && row.label === "Plataforma"
+                                      ? undefined
+                                      : "var(--font-family-mono)",
                                   color: val.rating
                                     ? getRatingColor(val.rating)
                                     : "inherit",
@@ -300,7 +314,7 @@ export function CompareTable({ brands, snapshots }: CompareTableProps) {
                                 {val.display}
                               </span>
                               {val.note && (
-                                <span className="text-[10px] text-muted-foreground">
+                                <span className={`text-[10px] text-muted-foreground text-center ${cellWrap}`}>
                                   {val.note}
                                 </span>
                               )}

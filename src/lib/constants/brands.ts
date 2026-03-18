@@ -22,6 +22,14 @@ export const GALDERMA_BRANDS: BrandConfig[] = [
     gradient: "linear-gradient(135deg, #681bb5, #8021de)",
   },
   {
+    name: "Galderma Aesthetics",
+    slug: "galdermaaesthetics",
+    domain: "galdermaaesthetics.com.br",
+    platform: "Site institucional",
+    color: "#0ea5e9",
+    gradient: "linear-gradient(135deg, #0284c7, #0ea5e9)",
+  },
+  {
     name: "Dermotivin",
     slug: "dermotivin",
     domain: "dermotivin.com.br",

@@ -24,6 +24,7 @@ const bottomItems = [
 
 const brandItems = [
   { slug: "cetaphil", name: "Cetaphil", color: "#8021de" },
+  { slug: "galdermaaesthetics", name: "Galderma Aesthetics", color: "#0ea5e9" },
   { slug: "dermotivin", name: "Dermotivin", color: "#be12b3" },
   { slug: "alastin", name: "Alastin", color: "#4124b2" },
 ];
@@ -42,10 +43,10 @@ export function SidebarNav({ onLinkClick }: SidebarNavProps) {
 
   return (
     <>
-      <div className="flex h-16 items-center gap-3 px-6 border-b border-[var(--border-subtle)]">
+      <div className="flex h-16 items-center gap-3 px-6 border-b border-(--border-subtle)">
         <div className="flex items-center gap-2">
           <span className="text-heading-lg text-2xl text-purple">MESSS</span>
-          <span className="text-metric text-[10px] text-[var(--text-muted)]">
+          <span className="text-metric text-[10px] text-(--text-muted)">
             DASHBOARD
           </span>
         </div>
@@ -63,8 +64,8 @@ export function SidebarNav({ onLinkClick }: SidebarNavProps) {
               {...linkProps(item.href)}
               className={
                 isActive
-                  ? "flex items-center gap-3 px-4 py-3 rounded-[var(--radius-button)] text-sm font-medium bg-purple/15 text-purple-light border border-purple/30 transition-colors duration-[var(--transition-fast)]"
-                  : "flex items-center gap-3 px-4 py-3 rounded-[var(--radius-button)] text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-alt)] transition-colors duration-[var(--transition-fast)]"
+                  ? "flex items-center gap-3 px-4 py-3 rounded-(--radius-button) text-sm font-medium bg-purple/15 text-purple-light border border-purple/30 transition-colors duration-(--transition-fast)"
+                  : "flex items-center gap-3 px-4 py-3 rounded-(--radius-button) text-sm font-medium text-(--text-secondary) hover:text-(--text-primary) hover:bg-(--bg-surface-alt) transition-colors duration-(--transition-fast)"
               }
               aria-current={isActive ? "page" : undefined}
             >
@@ -75,7 +76,7 @@ export function SidebarNav({ onLinkClick }: SidebarNavProps) {
         })}
 
         <div className="pt-6 pb-2 px-4">
-          <p className="text-metric text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
+          <p className="text-metric text-[10px] text-(--text-muted) uppercase tracking-wider">
             Marcas
           </p>
         </div>
@@ -89,8 +90,8 @@ export function SidebarNav({ onLinkClick }: SidebarNavProps) {
               {...linkProps(href)}
               className={
                 isActive
-                  ? "flex items-center gap-3 px-4 py-3 rounded-[var(--radius-button)] text-sm font-medium bg-[var(--bg-surface-alt)] border border-[var(--border-subtle)] text-[var(--text-primary)] transition-colors duration-[var(--transition-fast)]"
-                  : "flex items-center gap-3 px-4 py-3 rounded-[var(--radius-button)] text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-alt)] transition-colors duration-[var(--transition-fast)]"
+                  ? "flex items-center gap-3 px-4 py-3 rounded-(--radius-button) text-sm font-medium bg-(--bg-surface-alt) border border-(--border-subtle) text-(--text-primary) transition-colors duration-(--transition-fast)"
+                  : "flex items-center gap-3 px-4 py-3 rounded-(--radius-button) text-sm font-medium text-(--text-secondary) hover:text-(--text-primary) hover:bg-(--bg-surface-alt) transition-colors duration-(--transition-fast)"
               }
               aria-current={isActive ? "page" : undefined}
             >
@@ -101,21 +102,21 @@ export function SidebarNav({ onLinkClick }: SidebarNavProps) {
               />
               <span className="min-w-0 truncate">{brand.name}</span>
               {isActive && (
-                <BarChart3 size={16} className="ml-auto shrink-0 text-[var(--text-muted)]" />
+                <BarChart3 size={16} className="ml-auto shrink-0 text-(--text-muted)" />
               )}
             </Link>
           );
         })}
       </nav>
 
-      <div className="px-4 py-5 border-t border-[var(--border-subtle)] space-y-0.5">
+      <div className="px-4 py-5 border-t border-(--border-subtle) space-y-0.5">
         {bottomItems.map((item) => {
           const Icon = item.icon;
           return (
             <Link
               key={item.href}
               {...linkProps(item.href)}
-              className="flex items-center gap-3 px-4 py-3 rounded-[var(--radius-button)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-alt)] transition-colors duration-[var(--transition-fast)]"
+              className="flex items-center gap-3 px-4 py-3 rounded-(--radius-button) text-sm text-(--text-secondary) hover:text-(--text-primary) hover:bg-(--bg-surface-alt) transition-colors duration-(--transition-fast)"
             >
               <Icon size={20} strokeWidth={1.5} className="shrink-0" />
               <span>{item.label}</span>
