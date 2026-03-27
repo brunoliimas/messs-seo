@@ -7,7 +7,7 @@
 // ============================================================================
 
 import { drizzle } from "drizzle-orm/postgres-js";
-import { eq, and } from "drizzle-orm";
+import { eq, and, inArray } from "drizzle-orm";
 import postgres from "postgres";
 import { createId } from "@paralleldrive/cuid2";
 import {
@@ -48,10 +48,11 @@ const ids: {
   galdermaaesthetics: "",
   dermotivin: "",
   alastin: "",
-  auditCetaphil: createId(),
-  auditGaldermaAesthetics: createId(),
-  auditDermotivin: createId(),
-  auditAlastin: createId(),
+  // IDs fixos para tornar o seed idempotente
+  auditCetaphil: "seed-audit-cetaphil-2026-03",
+  auditGaldermaAesthetics: "seed-audit-galderma-aesthetics-2026-03",
+  auditDermotivin: "seed-audit-dermotivin-2026-03",
+  auditAlastin: "seed-audit-alastin-2026-03",
 };
 
 async function getOrgIdBySlug(slug: string): Promise<string | null> {
@@ -255,7 +256,7 @@ async function seed() {
       llmNumeric: LETTER_TO_NUMERIC["D+"],
       notes: "Sem dados CrUX (tráfego insuficiente). Lighthouse lab data only. Performance 63, muitos problemas de acessibilidade e peso de JS.",
     },
-  ]);
+  ]).onConflictDoNothing();
 
   // ═══════════════════════════════════════════════
   // 5. SNAPSHOTS (CrUX + Lighthouse)
@@ -424,6 +425,19 @@ async function seed() {
   // ═══════════════════════════════════════════════
   // 6. FINDINGS
   // ═══════════════════════════════════════════════
+  const seedAuditIds = [
+    ids.auditCetaphil,
+    ids.auditGaldermaAesthetics,
+    ids.auditDermotivin,
+    ids.auditAlastin,
+  ];
+
+  // Limpa dados do recorte do seed antes de inserir novamente
+  await db
+    .delete(recommendations)
+    .where(inArray(recommendations.auditId, seedAuditIds));
+  await db.delete(findings).where(inArray(findings.auditId, seedAuditIds));
+
   console.log("🔍 Criando findings...");
 
   // ── CETAPHIL — 11 findings (3 critical, 4 warn, 4 good) ──
