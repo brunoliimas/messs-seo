@@ -41,6 +41,14 @@ const ids: {
   auditGaldermaAesthetics: string;
   auditDermotivin: string;
   auditAlastin: string;
+  snapshotCetaphilCruxMobile: string;
+  snapshotCetaphilCruxDesktopUrl: string;
+  snapshotCetaphilCruxDesktopOrigin: string;
+  snapshotGaldermaAestheticsCruxMobile: string;
+  snapshotGaldermaAestheticsLighthouseDesktop: string;
+  snapshotDermotivinCruxMobile: string;
+  snapshotDermotivinCruxDesktop: string;
+  snapshotAlastinLighthouseDesktop: string;
 } = {
   org: "",
   client: "",
@@ -53,6 +61,22 @@ const ids: {
   auditGaldermaAesthetics: "seed-audit-galderma-aesthetics-2026-03",
   auditDermotivin: "seed-audit-dermotivin-2026-03",
   auditAlastin: "seed-audit-alastin-2026-03",
+  // IDs fixos de snapshots para evitar duplicação em reruns
+  snapshotCetaphilCruxMobile: "seed-snapshot-cetaphil-crux-mobile-2026-02-24",
+  snapshotCetaphilCruxDesktopUrl:
+    "seed-snapshot-cetaphil-crux-desktop-url-2026-02-24",
+  snapshotCetaphilCruxDesktopOrigin:
+    "seed-snapshot-cetaphil-crux-desktop-origin-2026-02-24",
+  snapshotGaldermaAestheticsCruxMobile:
+    "seed-snapshot-galderma-aesthetics-crux-mobile-2026-03-02",
+  snapshotGaldermaAestheticsLighthouseDesktop:
+    "seed-snapshot-galderma-aesthetics-lighthouse-desktop-2026-03-01",
+  snapshotDermotivinCruxMobile:
+    "seed-snapshot-dermotivin-crux-mobile-2026-02-24",
+  snapshotDermotivinCruxDesktop:
+    "seed-snapshot-dermotivin-crux-desktop-2026-02-24",
+  snapshotAlastinLighthouseDesktop:
+    "seed-snapshot-alastin-lighthouse-desktop-2026-03-01",
 };
 
 async function getOrgIdBySlug(slug: string): Promise<string | null> {
@@ -269,7 +293,7 @@ async function seed() {
     // ── CETAPHIL ──
     // CrUX Mobile
     {
-      id: createId(),
+      id: ids.snapshotCetaphilCruxMobile,
       brandId: ids.cetaphil,
       date: cruxPeriod,
       source: "crux",
@@ -287,7 +311,7 @@ async function seed() {
     },
     // CrUX Desktop URL
     {
-      id: createId(),
+      id: ids.snapshotCetaphilCruxDesktopUrl,
       brandId: ids.cetaphil,
       date: cruxPeriod,
       source: "crux",
@@ -305,7 +329,7 @@ async function seed() {
     },
     // CrUX Desktop Origin (CLS reprovado)
     {
-      id: createId(),
+      id: ids.snapshotCetaphilCruxDesktopOrigin,
       brandId: ids.cetaphil,
       date: cruxPeriod,
       source: "crux",
@@ -319,7 +343,7 @@ async function seed() {
     // ── GALDERMA AESTHETICS ──
     // CrUX Mobile (URL)
     {
-      id: createId(),
+      id: ids.snapshotGaldermaAestheticsCruxMobile,
       brandId: ids.galdermaaesthetics,
       date: new Date("2026-03-02T00:00:00Z"),
       source: "crux",
@@ -337,7 +361,7 @@ async function seed() {
     },
     // Lighthouse Lab Data Desktop
     {
-      id: createId(),
+      id: ids.snapshotGaldermaAestheticsLighthouseDesktop,
       brandId: ids.galdermaaesthetics,
       date: new Date("2026-03-01T00:00:00Z"),
       source: "lighthouse",
@@ -360,7 +384,7 @@ async function seed() {
     // ── DERMOTIVIN ──
     // CrUX Mobile
     {
-      id: createId(),
+      id: ids.snapshotDermotivinCruxMobile,
       brandId: ids.dermotivin,
       date: cruxPeriod,
       source: "crux",
@@ -378,7 +402,7 @@ async function seed() {
     },
     // CrUX Desktop
     {
-      id: createId(),
+      id: ids.snapshotDermotivinCruxDesktop,
       brandId: ids.dermotivin,
       date: cruxPeriod,
       source: "crux",
@@ -398,7 +422,7 @@ async function seed() {
     // ── ALASTIN ──
     // Lighthouse Lab Data Desktop (sem CrUX — tráfego insuficiente)
     {
-      id: createId(),
+      id: ids.snapshotAlastinLighthouseDesktop,
       brandId: ids.alastin,
       date: new Date("2026-03-01T00:00:00Z"),
       source: "lighthouse",
@@ -420,7 +444,7 @@ async function seed() {
       totalByteWeight: 2_500_000, // ~2.4MB total
       unusedJsBytes: 1_003_000, // 1003KB JS
     },
-  ]);
+  ]).onConflictDoNothing();
 
   // ═══════════════════════════════════════════════
   // 6. FINDINGS
@@ -1131,11 +1155,11 @@ async function seed() {
   console.log("\n✅ Seed completo!");
   console.log("   • 1 organização (MESSS)");
   console.log("   • 1 cliente (Galderma Brasil)");
-  console.log("   • 3 marcas (Cetaphil, Dermotivin, ALASTIN)");
-  console.log("   • 3 auditorias com scores normalizados");
-  console.log("   • 7 snapshots (CrUX + Lighthouse)");
-  console.log("   • 33 findings (11 + 10 + 12)");
-  console.log("   • 26 recomendações (8 + 7 + 11)");
+  console.log("   • 4 marcas (Cetaphil, Galderma Aesthetics, Dermotivin, ALASTIN)");
+  console.log("   • 4 auditorias com scores normalizados");
+  console.log("   • 8 snapshots (CrUX + Lighthouse)");
+  console.log("   • 42 findings (11 + 9 + 10 + 12)");
+  console.log("   • 30 recomendações (8 + 4 + 7 + 11)");
 
   process.exit(0);
 }
