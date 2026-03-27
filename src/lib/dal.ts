@@ -296,8 +296,19 @@ export async function getRecommendations(
     });
     if (!brand) return [];
 
+    // Mostra apenas recomendações da auditoria mais recente da marca,
+    // evitando repetir itens históricos iguais na UI.
+    const latestAudit = await db.query.audits.findFirst({
+      where: eq(schema.audits.brandId, brand.id),
+      orderBy: desc(schema.audits.date),
+    });
+    if (!latestAudit) return [];
+
     const recs = await db.query.recommendations.findMany({
-      where: eq(schema.recommendations.brandId, brand.id),
+      where: and(
+        eq(schema.recommendations.brandId, brand.id),
+        eq(schema.recommendations.auditId, latestAudit.id)
+      ),
       orderBy: [
         sql`CASE 
           WHEN ${schema.recommendations.priority} = 'critical' THEN 1 
@@ -308,13 +319,22 @@ export async function getRecommendations(
       ],
     });
 
-    return recs.map((r) => ({
+    const mapped = recs.map((r) => ({
       priority: r.priority as "critical" | "high" | "medium" | "low",
       category: r.category,
       text: r.text,
       timeline: r.timeline,
       status: r.status as "pending" | "in_progress" | "done" | "wont_fix",
     }));
+
+    // Guarda adicional para dados legados: remove possíveis duplicados exatos.
+    const seen = new Set<string>();
+    return mapped.filter((r) => {
+      const key = `${r.priority}|${r.category}|${r.text}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
   } catch (error) {
     logDalFallback("getRecommendations", error);
     const { getMockRecommendations } = await import("./mock-data");
